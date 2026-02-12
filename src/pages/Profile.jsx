@@ -9,7 +9,10 @@ const Profile = () => {
 
     // Initialize with safe defaults
     const [bio, setBio] = useState(user?.bio || "I love gazing at the stars and thinking about the void.");
+    const [location, setLocation] = useState(user?.location || "");
     const [isLocationPrivate, setIsLocationPrivate] = useState(true);
+    const [suggestions, setSuggestions] = useState([]);
+    const [isSearching, setIsSearching] = useState(false);
     const fileInputRef = useRef(null);
 
     // Trait State
