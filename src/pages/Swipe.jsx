@@ -150,7 +150,7 @@ const Swipe = () => {
                 display: 'flex', flexDirection: 'column' // Ensure content stretches
             }}>
                 <img
-                    src={currentUser.avatar || "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1000"}
+                    src={currentUser.avatar || currentUser.photoURL || "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1000"}
                     alt={currentUser.name}
                     style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.9 }}
                 />

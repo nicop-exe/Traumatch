@@ -23,12 +23,14 @@ function App() {
     React.useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
             if (firebaseUser) {
-                const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
-                if (userDoc.exists()) {
-                    setUser({ uid: firebaseUser.uid, email: firebaseUser.email, ...userDoc.data() });
-                } else {
-                    setUser({ uid: firebaseUser.uid, email: firebaseUser.email, name: firebaseUser.displayName || 'New Soul' });
-                }
+                const data = userDoc.exists() ? userDoc.data() : {};
+                setUser({
+                    uid: firebaseUser.uid,
+                    email: firebaseUser.email,
+                    name: data.name || firebaseUser.displayName || 'New Soul',
+                    avatar: data.avatar || firebaseUser.photoURL || "",
+                    ...data
+                });
             } else {
                 setUser(null);
             }
