@@ -57,7 +57,7 @@ const Profile = () => {
     if (!user) return <div style={{ padding: '2rem', textAlign: 'center' }}>Please log in.</div>;
 
     return (
-        <div style={{ padding: '2rem 1rem', maxWidth: '600px', margin: '0 auto' }}>
+        <div className="page-container">
             <h2 style={{ color: 'var(--color-secondary)', textAlign: 'center', marginBottom: '2rem' }}>Edit Profile</h2>
 
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '2rem' }}>
@@ -144,7 +144,7 @@ const Profile = () => {
                             display: 'flex', alignItems: 'center', gap: '8px', border: '1px solid currentColor'
                         }}>
                             {trait}
-                            <button onClick={() => removeTrait(trait, activeTab)} style={{ color: 'inherit', display: 'flex', alignItems: 'center' }}>×</button>
+                            <button onClick={() => removeTrait(trait, activeTab)} className="icon-btn" style={{ padding: 0, color: 'inherit' }}>×</button>
                         </span>
                     ))}
                     {(activeTab === 'positive' ? positiveTraits : negativeTraits).length === 0 && (
@@ -165,7 +165,8 @@ const Profile = () => {
                 </div>
                 <button
                     onClick={() => setIsLocationPrivate(!isLocationPrivate)}
-                    style={{ display: 'flex', alignItems: 'center', gap: '5px', color: isLocationPrivate ? 'var(--color-accent)' : 'var(--color-text-muted)', background: 'transparent' }}
+                    className="icon-btn"
+                    style={{ color: isLocationPrivate ? 'var(--color-accent)' : 'var(--color-text-muted)', gap: '5px', borderRadius: '8px' }}
                 >
                     {isLocationPrivate ? <Lock size={16} /> : <Globe size={16} />}
                     <span style={{ fontSize: '0.8rem' }}>{isLocationPrivate ? 'Private' : 'Public'}</span>

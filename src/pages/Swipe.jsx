@@ -125,7 +125,7 @@ const Swipe = () => {
     }
 
     return (
-        <div style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: '1rem', maxWidth: '600px', margin: '0 auto' }}>
+        <div className="page-container" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <h2 style={{ textAlign: 'center', color: 'var(--color-text)', marginBottom: '1rem', letterSpacing: '2px', textTransform: 'uppercase', fontSize: '0.9rem' }}>Discover Souls</h2>
 
             <div style={{
@@ -189,36 +189,30 @@ const Swipe = () => {
             <div style={{ height: '100px', display: 'flex', justifyContent: 'space-evenly', alignItems: 'center', padding: '1rem 0' }}>
                 <button
                     onClick={() => handleSwipe('left')}
-                    className="btn-action"
+                    className="icon-btn"
                     style={{
-                        width: '65px', height: '65px', borderRadius: '50%',
-                        backgroundColor: 'rgba(20, 20, 30, 0.5)',
+                        width: '70px', height: '70px',
+                        backgroundColor: 'rgba(255, 68, 68, 0.1)',
                         border: '2px solid #ff4444',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        color: '#ff4444', fontSize: '2rem',
-                        backdropFilter: 'blur(5px)',
-                        boxShadow: '0 5px 15px rgba(0,0,0,0.3)',
-                        transition: 'transform 0.2s'
+                        color: '#ff4444',
+                        boxShadow: '0 5px 20px rgba(255, 68, 68, 0.2)'
                     }}
                 >
-                    <X />
+                    <X size={32} />
                 </button>
 
                 <button
                     onClick={() => handleSwipe('right')}
-                    className="btn-action"
+                    className="icon-btn"
                     style={{
-                        width: '65px', height: '65px', borderRadius: '50%',
-                        backgroundColor: 'rgba(20, 20, 30, 0.5)',
+                        width: '70px', height: '70px',
+                        backgroundColor: 'rgba(100, 255, 218, 0.1)',
                         border: '2px solid var(--color-accent)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        color: 'var(--color-accent)', fontSize: '2rem',
-                        backdropFilter: 'blur(5px)',
-                        boxShadow: '0 5px 15px rgba(0,0,0,0.3)',
-                        transition: 'transform 0.2s'
+                        color: 'var(--color-accent)',
+                        boxShadow: '0 5px 20px rgba(100, 255, 218, 0.2)'
                     }}
                 >
-                    <Heart />
+                    <Heart size={32} />
                 </button>
             </div>
         </div>

@@ -114,7 +114,7 @@ const Chat = () => {
                 zIndex: 10
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <button onClick={() => setSelectedMatch(null)}><ChevronLeft color="white" /></button>
+                    <button onClick={() => setSelectedMatch(null)} className="icon-btn"><ChevronLeft color="white" /></button>
                     <img src={selectedMatch.avatar} alt={selectedMatch.name} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
                     <span style={{ fontWeight: 'bold' }}>{selectedMatch.name}</span>
                 </div>
@@ -161,11 +161,12 @@ const Chat = () => {
             }}>
                 <button
                     onClick={handleRecordToggle}
+                    className="icon-btn"
                     style={{
-                        width: '40px', height: '40px', borderRadius: '50%',
-                        backgroundColor: isRecording ? '#ff4444' : 'rgba(255,255,255,0.1)',
-                        color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        transition: 'all 0.2s'
+                        width: '45px', height: '45px',
+                        backgroundColor: isRecording ? '#ff4444' : 'rgba(255,255,255,0.05)',
+                        color: 'white',
+                        border: isRecording ? 'none' : '1px solid rgba(255,255,255,0.1)'
                     }}
                 >
                     <Mic size={20} className={isRecording ? 'animate-pulse' : ''} />
@@ -179,6 +180,7 @@ const Chat = () => {
                 />
                 <button
                     onClick={handleSendMessage}
+                    className="icon-btn"
                     style={{ color: 'var(--color-secondary)' }}
                 >
                     <Send size={24} />
