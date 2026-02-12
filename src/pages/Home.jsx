@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { AppContext } from '../App';
 import { Music, TrendingUp, Radio } from 'lucide-react';
 
 const Home = () => {
