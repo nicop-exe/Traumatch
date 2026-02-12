@@ -30,8 +30,10 @@ const Swipe = () => {
             setIsLoading(true);
             try {
                 // In a real app, we'd filter out already swiped users here
-                const q = query(collection(db, "users"), limit(20));
+                const q = query(collection(db, "users"), limit(40));
                 const querySnapshot = await getDocs(q);
+                const matchedIds = matches.map(m => m.id || m.uid);
+
                 const users = [];
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
@@ -40,7 +42,9 @@ const Swipe = () => {
                         (data.email && data.email === user.email) ||
                         (data.name && data.name === user.name);
 
-                    if (!isCurrentUser) {
+                    const alreadyMatched = matchedIds.includes(doc.id);
+
+                    if (!isCurrentUser && !alreadyMatched) {
                         users.push({ id: doc.id, uid: doc.id, ...data });
                     }
                 });

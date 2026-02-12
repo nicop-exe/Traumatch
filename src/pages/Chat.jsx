@@ -94,7 +94,7 @@ const Chat = () => {
         if (!user || !selectedMatch) return;
 
         // Consistent chatId: smallerUID_largerUID
-        const chatId = [user.uid, selectedMatch.id].sort().join('_');
+        const chatId = [user.uid, selectedMatch.id || selectedMatch.uid].sort().join('_');
 
         const q = query(
             collection(db, "chats", chatId, "messages"),
@@ -115,7 +115,7 @@ const Chat = () => {
     const handleSendMessage = async () => {
         if (!inputText.trim() || !user || !selectedMatch) return;
 
-        const chatId = [user.uid, selectedMatch.id].sort().join('_');
+        const chatId = [user.uid, selectedMatch.id || selectedMatch.uid].sort().join('_');
         const messageData = {
             text: inputText,
             senderId: user.uid,

@@ -1,6 +1,6 @@
 import React, { useContext, useState, useRef } from 'react';
 import { AppContext } from '../App';
-import { db } from '../firebase';
+import { auth, db } from '../firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { Camera, MapPin, Lock, Globe } from 'lucide-react';
 
@@ -61,7 +61,7 @@ const Profile = () => {
                 location: location || ""
             };
             try {
-                if (user.uid) {
+                if (user?.uid) {
                     await setDoc(doc(db, "users", user.uid), profileUpdate, { merge: true });
                 }
                 setUser({ ...user, ...profileUpdate });
@@ -77,12 +77,43 @@ const Profile = () => {
         }
     };
 
-    const handleImageUpload = (event) => {
+    const resizeImage = (base64Str, maxWidth = 400, maxHeight = 400) => {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.src = base64Str;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > maxWidth) {
+                        height *= maxWidth / width;
+                        width = maxWidth;
+                    }
+                } else {
+                    if (height > maxHeight) {
+                        width *= maxHeight / height;
+                        height = maxHeight;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                resolve(canvas.toDataURL('image/jpeg', 0.7)); // Compress to 70% quality
+            };
+        });
+    };
+
+    const handleImageUpload = async (event) => {
         const file = event.target.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onloadend = () => {
-                setUser({ ...user, avatar: reader.result });
+            reader.onloadend = async () => {
+                const resized = await resizeImage(reader.result);
+                setUser({ ...user, avatar: resized });
             };
             reader.readAsDataURL(file);
         }
