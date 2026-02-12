@@ -125,7 +125,6 @@ const Swipe = () => {
     }
 
     return (
-    return (
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: '1rem', maxWidth: '600px', margin: '0 auto' }}>
             <h2 style={{ textAlign: 'center', color: 'var(--color-text)', marginBottom: '1rem', letterSpacing: '2px', textTransform: 'uppercase', fontSize: '0.9rem' }}>Discover Souls</h2>
 
