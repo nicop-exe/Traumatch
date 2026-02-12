@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useRef } from 'react';
 import { AppContext } from '../App';
 import { Camera, MapPin, Lock, Globe } from 'lucide-react';
 
@@ -8,6 +8,7 @@ const Profile = () => {
     // Initialize with safe defaults
     const [bio, setBio] = useState(user?.bio || "I love gazing at the stars and thinking about the void.");
     const [isLocationPrivate, setIsLocationPrivate] = useState(true);
+    const fileInputRef = useRef(null);
 
     // Trait State
     const [positiveTraits, setPositiveTraits] = useState(user?.positive || []);
@@ -42,6 +43,17 @@ const Profile = () => {
         }
     };
 
+    const handleImageUpload = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setUser({ ...user, avatar: reader.result });
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     if (!user) return <div style={{ padding: '2rem', textAlign: 'center' }}>Please log in.</div>;
 
     return (
@@ -55,12 +67,22 @@ const Profile = () => {
                         alt="Profile"
                         style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--color-secondary)' }}
                     />
-                    <button style={{
-                        position: 'absolute', bottom: '0', right: '0',
-                        backgroundColor: 'var(--color-primary)', border: '1px solid var(--color-secondary)',
-                        borderRadius: '50%', width: '36px', height: '36px',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-secondary)'
-                    }}>
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleImageUpload}
+                        style={{ display: 'none' }}
+                        accept="image/*"
+                    />
+                    <button
+                        onClick={() => fileInputRef.current.click()}
+                        style={{
+                            position: 'absolute', bottom: '0', right: '0',
+                            backgroundColor: 'var(--color-primary)', border: '1px solid var(--color-secondary)',
+                            borderRadius: '50%', width: '36px', height: '36px',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-secondary)'
+                        }}
+                    >
                         <Camera size={18} />
                     </button>
                 </div>

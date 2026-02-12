@@ -114,11 +114,6 @@ const Chat = () => {
                     <img src={selectedMatch.avatar} alt={selectedMatch.name} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
                     <span style={{ fontWeight: 'bold' }}>{selectedMatch.name}</span>
                 </div>
-                {/* Hidden Bond Indicator */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>
-                    <Lock size={14} />
-                    <span>Bond Hidden</span>
-                </div>
             </div>
 
             {/* Messages */}
