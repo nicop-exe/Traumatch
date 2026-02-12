@@ -3,123 +3,126 @@ import { AppContext } from '../App';
 import { X, Heart, Info, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const MOCK_USERS = [
-    {
-        id: 2,
-        name: "Elena",
-        age: 23,
-        bio: "Trying to find peace in chaos.",
-        avatar: "https://via.placeholder.com/500/0a192f/ffd700?text=Elena",
-        traumas: ["Anxiety", "Trust Issues"],
-        positive: ["Empathetic", "Creative"]
-    },
-    {
-        id: 3,
-        name: "Marcus",
-        age: 27,
-        bio: "Music is my escape.",
-        avatar: "https://via.placeholder.com/500/0a192f/ffd700?text=Marcus",
-        traumas: ["Loneliness", "Burnout"],
-        positive: ["Resilient", "Passionate"]
-    },
-    {
-        id: 4,
-        name: "Sophia",
-        age: 25,
-        bio: "Art heals everything.",
-        avatar: "https://via.placeholder.com/500/0a192f/ffd700?text=Sophia",
-        traumas: ["Perfectionism", "Sensitive"],
-        positive: ["Kind", "Artistic"]
-    }
-];
+import { db } from '../firebase';
+import { collection, query, getDocs, where, limit } from 'firebase/firestore';
 
 const Swipe = () => {
-    const { matches, setMatches, user } = useContext(AppContext);
-    const [currentIndex, setCurrentIndex] = useState(0);
+    const { matches, setMatches, user } = React.useContext(AppContext);
+    const [potentialMatches, setPotentialMatches] = React.useState([]);
+    const [currentIndex, setCurrentIndex] = React.useState(0);
+    const [isLoading, setIsLoading] = React.useState(true);
     const navigate = useNavigate();
 
-    // Reset if we run out of users
-    const currentUser = currentIndex < MOCK_USERS.length ? MOCK_USERS[currentIndex] : null;
+    // Fetch real users from Firestore
+    React.useEffect(() => {
+        const fetchUsers = async () => {
+            if (!user) return;
+            setIsLoading(true);
+            try {
+                // In a real app, we'd filter out already swiped users here
+                const q = query(collection(db, "users"), limit(20));
+                const querySnapshot = await getDocs(q);
+                const users = [];
+                querySnapshot.forEach((doc) => {
+                    if (doc.id !== user.uid) {
+                        users.push({ id: doc.id, uid: doc.id, ...doc.data() });
+                    }
+                });
+                setPotentialMatches(users);
+            } catch (e) {
+                console.error("Error fetching matches:", e);
+            } finally {
+                setIsLoading(false);
+            }
+        };
 
-    // Algorithm to calculate bond strength
-    const calculateMatchScore = (me, candidate) => {
-        let score = 0;
+        fetchUsers();
+    }, [user]);
+
+    const currentUser = currentIndex < potentialMatches.length ? potentialMatches[currentIndex] : null;
+
+    // Advanced Algorithm: Soul Bond Strength
+    const calculateMatchScore = (me, target) => {
+        if (!me || !target) return { score: 0, reasons: [] };
+
+        let score = 20; // Base score (chemistry)
         let reasons = [];
 
-        // Safety check
-        if (!me || !candidate) return { score: 0, reasons: [] };
+        // 1. Shared Traumas (The "Traumatch" core)
+        const myTraumas = me.traumas || [];
+        const theirTraumas = target.traumas || [];
+        const sharedTraumas = myTraumas.filter(t => theirTraumas.includes(t));
 
-        // Check for shared traumas (High Value)
-        if (me?.traumas && candidate?.traumas) {
-            const sharedTraumas = me.traumas.filter(t => candidate.traumas.includes(t));
-            if (sharedTraumas.length > 0) {
-                score += sharedTraumas.length * 25; // Increased weight
-                reasons.push(...sharedTraumas);
-            }
+        if (me.intent === 'match') {
+            // Looking for someone similar
+            score += sharedTraumas.length * 20;
+            if (sharedTraumas.length > 0) reasons.push(`Shared: ${sharedTraumas[0]}`);
+        } else if (me.intent === 'complement') {
+            // Looking for balance
+            const sharedPositive = (me.positive || []).filter(p => (target.positive || []).includes(p));
+            score += sharedPositive.length * 15;
+            if (sharedTraumas.length === 0) score += 10; // Bonus for not sharing same heavy baggage
+            if (sharedPositive.length > 0) reasons.push(`Synchronized: ${sharedPositive[0]}`);
         }
 
-        // Check for shared positive traits (Medium Value)
-        if (me?.positive && candidate?.positive) {
-            const sharedPositive = me.positive.filter(p => candidate.positive.includes(p));
-            if (sharedPositive.length > 0) {
-                score += sharedPositive.length * 15;
-                reasons.push(...sharedPositive);
-            }
-        }
+        // 2. Shared Interests
+        const sharedInterests = (me.interests || []).filter(i => (target.interests || []).includes(i));
+        score += sharedInterests.length * 10;
+        if (sharedInterests.length > 0) reasons.push(`In Tune: ${sharedInterests[0]}`);
 
-        // Random factor for "Spark" - ensure at least some possibility even without traits
-        score += Math.random() * 30;
-
-        return { score, reasons };
+        // 3. Normalized result (max approx 100)
+        return {
+            score: Math.min(Math.round(score), 99),
+            reasons
+        };
     };
 
     const handleSwipe = (direction) => {
-        if (!user) {
-            alert("Please log in to match.");
-            return;
-        }
+        if (!user) return;
 
         if (direction === 'right') {
             const { score, reasons } = calculateMatchScore(user, currentUser);
-
-            // Lowered threshold to ensure better UX for testing
-            const threshold = 20;
+            const threshold = 30;
 
             if (score > threshold) {
-                const reason = reasons.length > 0 ? reasons[0] : "Mysterious Connection";
-
+                const reason = reasons.length > 0 ? reasons[0] : "Mysterious Spark";
                 if (!matches.find(m => m.id === currentUser.id)) {
                     setMatches([...matches, { ...currentUser, matchReason: reason, matchScore: score }]);
-                    alert(`It's a Match! Bond Strength: ${Math.round(score)}%`);
+                    alert(`Soul Bond Found! Strength: ${score}% - ${reason}`);
                 }
             } else {
-                // Optional: Feedback for non-match?
-                console.log("Score too low:", score);
+                alert(`Faded connection (${score}%). Moving on...`);
             }
         }
-
-        // Move to next
         setCurrentIndex(prev => prev + 1);
     };
 
     if (!user) {
         return (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', padding: '2rem', textAlign: 'center' }}>
-                <p>Please log in to start matching.</p>
-                <button className="btn" onClick={() => navigate('/auth')}>Go to Login</button>
+            <div className="page-container" style={{ textAlign: 'center', justifyContent: 'center' }}>
+                <p>Log in to discover waiting souls.</p>
+                <button className="btn" onClick={() => navigate('/auth')}>Go to Sanctuary</button>
+            </div>
+        );
+    }
+
+    if (isLoading) {
+        return (
+            <div className="page-container" style={{ textAlign: 'center', justifyContent: 'center' }}>
+                <div className="animate-pulse" style={{ color: 'var(--color-secondary)' }}>Searching the void for matches...</div>
             </div>
         );
     }
 
     if (!currentUser) {
         return (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', padding: '2rem', textAlign: 'center' }}>
-                <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+            <div className="page-container" style={{ textAlign: 'center', justifyContent: 'center' }}>
+                <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
                     <AlertCircle size={40} color="var(--color-text-muted)" />
                 </div>
-                <h2 style={{ color: 'var(--color-secondary)' }}>You've seen everyone!</h2>
-                <p style={{ color: 'var(--color-text-muted)', marginBottom: '2rem' }}>Check back later for more souls.</p>
-                <button className="btn btn-secondary" onClick={() => setCurrentIndex(0)}>Review Again</button>
+                <h2>The void is quiet.</h2>
+                <p style={{ color: 'var(--color-text-muted)', marginBottom: '2rem' }}>Check back as more souls enter the sanctuary.</p>
+                <button className="btn btn-secondary" onClick={() => setCurrentIndex(0)}>Search Again</button>
             </div>
         );
     }
