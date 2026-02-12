@@ -25,8 +25,12 @@ const Swipe = () => {
                 const users = [];
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
-                    // Filter out current user by UID AND Email (extra safety for duplicates)
-                    if (doc.id !== user.uid && data.email !== user.email) {
+                    const isCurrentUser =
+                        doc.id === user.uid ||
+                        (data.email && data.email === user.email) ||
+                        (data.name && data.name === user.name);
+
+                    if (!isCurrentUser) {
                         users.push({ id: doc.id, uid: doc.id, ...data });
                     }
                 });

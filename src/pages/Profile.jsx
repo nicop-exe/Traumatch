@@ -41,7 +41,14 @@ const Profile = () => {
 
     const handleSave = async () => {
         if (user) {
-            const profileUpdate = { bio, positive: positiveTraits, traumas: negativeTraits, location };
+            const profileUpdate = {
+                name: user.name,
+                email: user.email,
+                bio,
+                positive: positiveTraits,
+                traumas: negativeTraits,
+                location
+            };
             try {
                 if (user.uid) {
                     await setDoc(doc(db, "users", user.uid), profileUpdate, { merge: true });

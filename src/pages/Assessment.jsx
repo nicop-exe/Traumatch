@@ -117,6 +117,8 @@ const Assessment = () => {
             .map(a => a.trait);
 
         const profileUpdate = {
+            name: user?.name || "",
+            email: user?.email || "",
             positive: [...new Set([...(user?.positive || []), ...selectedPositive])],
             traumas: [...new Set([...(user?.traumas || []), ...selectedTraumas])],
             intent: finalAnswers.intent || "",
