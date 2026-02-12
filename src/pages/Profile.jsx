@@ -6,26 +6,29 @@ import { Camera, MapPin, Lock, Globe } from 'lucide-react';
 
 const Profile = () => {
     const { user, setUser } = useContext(AppContext);
-
-    // Initialize with safe defaults
     const [isSaving, setIsSaving] = useState(false);
     const fileInputRef = useRef(null);
+
+    // Trait State
+    const [bio, setBio] = useState(user?.bio || "");
+    const [location, setLocation] = useState(user?.location || "");
+    const [isLocationPrivate, setIsLocationPrivate] = useState(true);
+    const [suggestions, setSuggestions] = useState([]);
+    const [isSearching, setIsSearching] = useState(false);
+    const [positiveTraits, setPositiveTraits] = useState(user?.positive || []);
+    const [negativeTraits, setNegativeTraits] = useState(user?.traumas || []);
+    const [newTrait, setNewTrait] = useState("");
+    const [activeTab, setActiveTab] = useState('positive');
 
     // Sync local state if user context updates (e.g. initial fetch delay)
     React.useEffect(() => {
         if (user) {
             if (!bio && user.bio) setBio(user.bio);
             if (!location && user.location) setLocation(user.location);
-            if (positiveTraits.length === 0 && user.positive?.length > 0) setPositiveTraits(user.positive);
-            if (negativeTraits.length === 0 && user.traumas?.length > 0) setNegativeTraits(user.traumas);
+            if (positiveTraits.length === 0 && user.positive?.length > 0) setPositiveTraits(user.positive || []);
+            if (negativeTraits.length === 0 && user.traumas?.length > 0) setNegativeTraits(user.traumas || []);
         }
-    }, [user]);
-
-    // Trait State
-    const [positiveTraits, setPositiveTraits] = useState(user?.positive || []);
-    const [negativeTraits, setNegativeTraits] = useState(user?.traumas || []);
-    const [newTrait, setNewTrait] = useState("");
-    const [activeTab, setActiveTab] = useState('positive');
+    }, [user, bio, location, positiveTraits.length, negativeTraits.length]);
 
     const handleAddTrait = () => {
         if (!newTrait.trim()) return;
