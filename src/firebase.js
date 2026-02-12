@@ -2,15 +2,15 @@ import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-// TODO: Replace with your actual Firebase project configuration
-// You can find this in your Firebase Console -> Project Settings
+// Firebase project configuration
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "traumatch-project.firebaseapp.com",
-    projectId: "traumatch-project",
-    storageBucket: "traumatch-project.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyDYGVS3agiO0z_2nyNGmgdzbNUP9fqt2wk",
+    authDomain: "traumatch-f9171.firebaseapp.com",
+    projectId: "traumatch-f9171",
+    storageBucket: "traumatch-f9171.firebasestorage.app",
+    messagingSenderId: "591979432657",
+    appId: "1:591979432657:web:80693a12a52ee2408c0282",
+    measurementId: "G-GMDD94XG97"
 };
 
 // Initialize Firebase
