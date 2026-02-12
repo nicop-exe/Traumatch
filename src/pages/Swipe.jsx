@@ -93,7 +93,7 @@ const Swipe = () => {
         };
     };
 
-    const handleSwipe = (direction) => {
+    const handleSwipe = async (direction) => {
         if (!user) return;
 
         if (direction === 'right') {
