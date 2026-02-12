@@ -8,7 +8,7 @@ const Profile = () => {
     const { user, setUser } = useContext(AppContext);
 
     // Initialize with safe defaults
-    const [bio, setBio] = useState(user?.bio || "I love gazing at the stars and thinking about the void.");
+    const [bio, setBio] = useState(user?.bio || "");
     const [location, setLocation] = useState(user?.location || "");
     const [isLocationPrivate, setIsLocationPrivate] = useState(true);
     const [suggestions, setSuggestions] = useState([]);
