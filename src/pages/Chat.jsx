@@ -3,7 +3,7 @@ import { AppContext } from '../App';
 import * as Tone from 'tone';
 import { Mic, Send, Play, ChevronLeft, Lock, Info } from 'lucide-react';
 import { db } from '../firebase';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const Chat = () => {
     const { matches } = useContext(AppContext);
@@ -85,15 +85,47 @@ const Chat = () => {
         }
     };
 
-    const handleSendMessage = () => {
-        if (!inputText.trim()) return;
-        setMessages(prev => [...prev, { text: inputText, sender: 'me' }]);
+    // Real-time Messages Logic
+    useEffect(() => {
+        if (!user || !selectedMatch) return;
+
+        // Consistent chatId: smallerUID_largerUID
+        const chatId = [user.uid, selectedMatch.id].sort().join('_');
+
+        const q = query(
+            collection(db, "chats", chatId, "messages"),
+            orderBy("timestamp", "asc")
+        );
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const newMessages = [];
+            snapshot.forEach((doc) => {
+                newMessages.push(doc.data());
+            });
+            setMessages(newMessages);
+        });
+
+        return () => unsubscribe();
+    }, [user, selectedMatch]);
+
+    const handleSendMessage = async () => {
+        if (!inputText.trim() || !user || !selectedMatch) return;
+
+        const chatId = [user.uid, selectedMatch.id].sort().join('_');
+        const messageData = {
+            text: inputText,
+            senderId: user.uid,
+            timestamp: serverTimestamp()
+        };
+
         setInputText("");
 
-        // Mock reply
-        setTimeout(() => {
-            setMessages(prev => [...prev, { text: "That's interesting...", sender: 'them' }]);
-        }, 1500);
+        try {
+            await addDoc(collection(db, "chats", chatId, "messages"), messageData);
+        } catch (e) {
+            console.error("Error sending message:", e);
+            alert("Connection lost. Try again.");
+        }
     };
 
     const playAudio = (url) => {
@@ -171,12 +203,12 @@ const Chat = () => {
             }}>
                 {messages.map((msg, idx) => (
                     <div key={idx} style={{
-                        alignSelf: msg.sender === 'me' ? 'flex-end' : 'flex-start',
-                        backgroundColor: msg.sender === 'me' ? 'var(--color-secondary)' : 'rgba(255,255,255,0.1)',
-                        color: msg.sender === 'me' ? 'var(--color-primary)' : 'white',
-                        padding: '10px 15px', borderRadius: '15px', maxWidth: '70%',
-                        borderBottomRightRadius: msg.sender === 'me' ? '2px' : '15px',
-                        borderBottomLeftRadius: msg.sender === 'me' ? '15px' : '2px'
+                        alignSelf: msg.senderId === user.uid ? 'flex-end' : 'flex-start',
+                        backgroundColor: msg.senderId === user.uid ? 'var(--color-secondary)' : 'rgba(255,255,255,0.1)',
+                        color: msg.senderId === user.uid ? 'var(--color-primary)' : 'white',
+                        padding: '10px 15px', borderRadius: '15px', maxWidth: '85%',
+                        borderBottomRightRadius: msg.senderId === user.uid ? '2px' : '15px',
+                        borderBottomLeftRadius: msg.senderId === user.uid ? '15px' : '2px'
                     }}>
                         {msg.text && <p>{msg.text}</p>}
                         {msg.audio && (
@@ -190,13 +222,14 @@ const Chat = () => {
 
             {/* Input area style adjustment for fixed nav in Layout */}
             <div style={{
-                padding: '10px',
+                padding: '15px',
                 display: 'flex',
                 gap: '10px',
                 alignItems: 'center',
-                background: 'var(--color-primary)',
-                borderTop: '1px solid rgba(255,255,255,0.1)',
-                paddingBottom: '20px' // Just a bit of padding above safe area in Layout
+                background: 'rgba(10, 25, 47, 0.95)',
+                backdropFilter: 'blur(10px)',
+                borderTop: '1px solid rgba(255,255,255,0.05)',
+                paddingBottom: '25px'
             }}>
                 <button
                     onClick={handleRecordToggle}
