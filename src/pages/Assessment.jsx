@@ -117,12 +117,13 @@ const Assessment = () => {
             .map(a => a.trait);
 
         const profileUpdate = {
-            name: user?.name || "",
+            name: user?.name || "Soul",
             email: user?.email || "",
+            avatar: user?.avatar || "",
             positive: [...new Set([...(user?.positive || []), ...selectedPositive])],
             traumas: [...new Set([...(user?.traumas || []), ...selectedTraumas])],
-            intent: finalAnswers.intent || "",
-            interests: finalAnswers.interests || []
+            intent: finalAnswers?.intent || "",
+            interests: finalAnswers?.interests || []
         };
 
         try {

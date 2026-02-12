@@ -42,12 +42,13 @@ const Profile = () => {
     const handleSave = async () => {
         if (user) {
             const profileUpdate = {
-                name: user.name,
-                email: user.email,
-                bio,
-                positive: positiveTraits,
-                traumas: negativeTraits,
-                location
+                name: user?.name || "Soul",
+                email: user?.email || "",
+                avatar: user?.avatar || "",
+                bio: bio || "",
+                positive: positiveTraits || [],
+                traumas: negativeTraits || [],
+                location: location || ""
             };
             try {
                 if (user.uid) {
