@@ -8,12 +8,42 @@ import Auth from './pages/Auth';
 import Assessment from './pages/Assessment';
 import Layout from './components/Layout';
 
+import { auth, db } from './firebase';
+import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+
 // Simple Context for App State
 export const AppContext = React.createContext(null);
 
 function App() {
-    const [user, setUser] = useState(null); // Mock auth state
-    const [matches, setMatches] = useState([]); // Store matched users
+    const [user, setUser] = useState(null);
+    const [matches, setMatches] = useState([]);
+    const [isAppLoading, setIsAppLoading] = useState(true);
+
+    React.useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+            if (firebaseUser) {
+                const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
+                if (userDoc.exists()) {
+                    setUser({ uid: firebaseUser.uid, email: firebaseUser.email, ...userDoc.data() });
+                } else {
+                    setUser({ uid: firebaseUser.uid, email: firebaseUser.email, name: firebaseUser.displayName || 'New Soul' });
+                }
+            } else {
+                setUser(null);
+            }
+            setIsAppLoading(false);
+        });
+        return () => unsubscribe();
+    }, []);
+
+    if (isAppLoading) {
+        return (
+            <div className="app-shell" style={{ justifyContent: 'center', alignItems: 'center' }}>
+                <div className="animate-pulse" style={{ color: 'var(--color-secondary)', fontSize: '1.2rem' }}>Loading Traumatch...</div>
+            </div>
+        );
+    }
 
     return (
         <AppContext.Provider value={{ user, setUser, matches, setMatches }}>
