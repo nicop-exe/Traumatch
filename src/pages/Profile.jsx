@@ -124,7 +124,7 @@ const Profile = () => {
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '2rem' }}>
                 <div style={{ position: 'relative', width: '120px', height: '120px', marginBottom: '1rem' }}>
                     <img
-                        src={user?.avatar || "https://via.placeholder.com/150"}
+                        src={user?.avatar || `https://ui-avatars.com/api/?background=0a192f&color=ffd700&name=${encodeURIComponent(user?.name || 'Soul')}`}
                         alt="Profile"
                         style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--color-secondary)' }}
                     />

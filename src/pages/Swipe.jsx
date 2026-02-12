@@ -105,15 +105,29 @@ const Swipe = () => {
                 if (!matches.find(m => m.id === currentUser.id)) {
                     const matchData = { ...currentUser, matchReason: reason, matchScore: score, timestamp: new Date() };
 
-                    // Persist to Firestore
+                    // Persist to Firestore for BOTH users (Mutual Match)
                     try {
-                        await setDoc(doc(db, "users", user.uid, "matches", currentUser.id), matchData);
-                        setMatches([...matches, matchData]);
+                        const myMatchData = { ...currentUser, matchReason: reason, matchScore: score, timestamp: new Date() };
+                        const theirMatchData = {
+                            id: user.uid,
+                            uid: user.uid,
+                            name: user.name,
+                            avatar: user.avatar,
+                            matchReason: reason,
+                            matchScore: score,
+                            timestamp: new Date()
+                        };
+
+                        // Save for me
+                        await setDoc(doc(db, "users", user.uid, "matches", currentUser.id), myMatchData);
+                        // Save for them
+                        await setDoc(doc(db, "users", currentUser.id, "matches", user.uid), theirMatchData);
+
+                        setMatches([...matches, myMatchData]);
                         alert(`Soul Bond Found! Strength: ${score}% - ${reason}`);
                     } catch (e) {
                         console.error("Error saving match:", e);
-                        // Fallback to local only if Firestore fails
-                        setMatches([...matches, matchData]);
+                        setMatches([...matches, { ...currentUser, matchReason: reason, matchScore: score }]);
                         alert(`Soul Bond Found! (Local only due to void interference)`);
                     }
                 }
@@ -170,7 +184,7 @@ const Swipe = () => {
                 display: 'flex', flexDirection: 'column' // Ensure content stretches
             }}>
                 <img
-                    src={getHighResPhoto(currentUser.avatar || currentUser.photoURL) || "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1000"}
+                    src={getHighResPhoto(currentUser.avatar || currentUser.photoURL) || `https://ui-avatars.com/api/?background=0a192f&color=ffd700&name=${encodeURIComponent(currentUser.name || 'Soul')}`}
                     alt={currentUser.name}
                     style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.9 }}
                 />

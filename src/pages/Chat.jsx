@@ -163,7 +163,7 @@ const Chat = () => {
                                 onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.03)'}
                             >
                                 <img
-                                    src={getHighResPhoto(match.avatar || match.photoURL) || "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1000"}
+                                    src={getHighResPhoto(match.avatar || match.photoURL) || `https://ui-avatars.com/api/?background=0a192f&color=ffd700&name=${encodeURIComponent(match.name || 'Soul')}`}
                                     alt={match.name}
                                     style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,215,0,0.2)' }}
                                 />
