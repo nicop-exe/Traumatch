@@ -1,0 +1,158 @@
+import React, { useContext, useState } from 'react';
+import { AppContext } from '../App';
+import { Camera, MapPin, Lock, Globe } from 'lucide-react';
+
+const Profile = () => {
+    const { user, setUser } = useContext(AppContext);
+
+    // Initialize with safe defaults
+    const [bio, setBio] = useState(user?.bio || "I love gazing at the stars and thinking about the void.");
+    const [isLocationPrivate, setIsLocationPrivate] = useState(true);
+
+    // Trait State
+    const [positiveTraits, setPositiveTraits] = useState(user?.positive || []);
+    const [negativeTraits, setNegativeTraits] = useState(user?.traumas || []);
+    const [newTrait, setNewTrait] = useState("");
+    const [activeTab, setActiveTab] = useState('positive');
+
+    const handleAddTrait = () => {
+        if (!newTrait.trim()) return;
+        if (activeTab === 'positive') {
+            setPositiveTraits([...positiveTraits, newTrait.trim()]);
+        } else {
+            setNegativeTraits([...negativeTraits, newTrait.trim()]);
+        }
+        setNewTrait("");
+    };
+
+    const removeTrait = (trait, type) => {
+        if (type === 'positive') {
+            setPositiveTraits(positiveTraits.filter(t => t !== trait));
+        } else {
+            setNegativeTraits(negativeTraits.filter(t => t !== trait));
+        }
+    };
+
+    const handleSave = () => {
+        if (user) {
+            setUser({ ...user, bio, positive: positiveTraits, traumas: negativeTraits });
+            alert("Profile & Emotional Data saved!");
+        } else {
+            alert("Error: No user logged in.");
+        }
+    };
+
+    if (!user) return <div style={{ padding: '2rem', textAlign: 'center' }}>Please log in.</div>;
+
+    return (
+        <div style={{ padding: '2rem 1rem 6rem 1rem' }}>
+            <h2 style={{ color: 'var(--color-secondary)', textAlign: 'center', marginBottom: '2rem' }}>Edit Profile</h2>
+
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '2rem' }}>
+                <div style={{ position: 'relative', width: '120px', height: '120px', marginBottom: '1rem' }}>
+                    <img
+                        src={user?.avatar || "https://via.placeholder.com/150"}
+                        alt="Profile"
+                        style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--color-secondary)' }}
+                    />
+                    <button style={{
+                        position: 'absolute', bottom: '0', right: '0',
+                        backgroundColor: 'var(--color-primary)', border: '1px solid var(--color-secondary)',
+                        borderRadius: '50%', width: '36px', height: '36px',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-secondary)'
+                    }}>
+                        <Camera size={18} />
+                    </button>
+                </div>
+                <h3 style={{ fontSize: '1.5rem' }}>{user?.name}</h3>
+            </div>
+
+            <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-muted)' }}>Bio</label>
+                <textarea
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    rows={3}
+                    style={{ resize: 'none' }}
+                />
+            </div>
+
+            {/* Emotional Aspects Section */}
+            <div style={{ marginBottom: '2rem' }}>
+                <label style={{ display: 'block', marginBottom: '1rem', color: 'var(--color-text-muted)', textAlign: 'center' }}>Emotional Aspects</label>
+
+                <div style={{ display: 'flex', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                    <button
+                        onClick={() => setActiveTab('positive')}
+                        style={{
+                            flex: 1, padding: '10px',
+                            borderBottom: activeTab === 'positive' ? '2px solid var(--color-secondary)' : 'none',
+                            color: activeTab === 'positive' ? 'var(--color-secondary)' : 'var(--color-text-muted)',
+                            background: 'transparent'
+                        }}
+                    >Positive</button>
+                    <button
+                        onClick={() => setActiveTab('negative')}
+                        style={{
+                            flex: 1, padding: '10px',
+                            borderBottom: activeTab === 'negative' ? '2px solid #ff4444' : 'none',
+                            color: activeTab === 'negative' ? '#ff4444' : 'var(--color-text-muted)',
+                            background: 'transparent'
+                        }}
+                    >Traumas / Deep</button>
+                </div>
+
+                <div style={{ display: 'flex', gap: '10px', marginBottom: '1rem' }}>
+                    <input
+                        type="text"
+                        value={newTrait}
+                        onChange={(e) => setNewTrait(e.target.value)}
+                        placeholder={`Add ${activeTab} trait...`}
+                        style={{ margin: 0 }}
+                    />
+                    <button onClick={handleAddTrait} className="btn" style={{ padding: '0 20px', minWidth: '50px' }}>+</button>
+                </div>
+
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                    {(activeTab === 'positive' ? positiveTraits : negativeTraits).map((trait, idx) => (
+                        <span key={idx} style={{
+                            backgroundColor: activeTab === 'positive' ? 'rgba(255,215,0,0.15)' : 'rgba(255,68,68,0.15)',
+                            color: activeTab === 'positive' ? 'var(--color-secondary)' : '#ff4444',
+                            padding: '6px 12px', borderRadius: '20px', fontSize: '0.9rem',
+                            display: 'flex', alignItems: 'center', gap: '8px', border: '1px solid currentColor'
+                        }}>
+                            {trait}
+                            <button onClick={() => removeTrait(trait, activeTab)} style={{ color: 'inherit', display: 'flex', alignItems: 'center' }}>×</button>
+                        </span>
+                    ))}
+                    {(activeTab === 'positive' ? positiveTraits : negativeTraits).length === 0 && (
+                        <span style={{ color: 'var(--color-text-muted)', fontStyle: 'italic', fontSize: '0.8rem', width: '100%', textAlign: 'center' }}>
+                            No traits added yet. Add some to improve matching!
+                        </span>
+                    )}
+                </div>
+            </div>
+
+            <div style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <MapPin size={20} color="var(--color-secondary)" />
+                    <div>
+                        <div style={{ fontWeight: 'bold' }}>Location</div>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>New York, USA</div>
+                    </div>
+                </div>
+                <button
+                    onClick={() => setIsLocationPrivate(!isLocationPrivate)}
+                    style={{ display: 'flex', alignItems: 'center', gap: '5px', color: isLocationPrivate ? 'var(--color-accent)' : 'var(--color-text-muted)', background: 'transparent' }}
+                >
+                    {isLocationPrivate ? <Lock size={16} /> : <Globe size={16} />}
+                    <span style={{ fontSize: '0.8rem' }}>{isLocationPrivate ? 'Private' : 'Public'}</span>
+                </button>
+            </div>
+
+            <button className="btn" style={{ width: '100%' }} onClick={handleSave}>Save Changes</button>
+        </div>
+    );
+};
+
+export default Profile;
