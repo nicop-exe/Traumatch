@@ -24,8 +24,10 @@ const Swipe = () => {
                 const querySnapshot = await getDocs(q);
                 const users = [];
                 querySnapshot.forEach((doc) => {
-                    if (doc.id !== user.uid) {
-                        users.push({ id: doc.id, uid: doc.id, ...doc.data() });
+                    const data = doc.data();
+                    // Filter out current user by UID AND Email (extra safety for duplicates)
+                    if (doc.id !== user.uid && data.email !== user.email) {
+                        users.push({ id: doc.id, uid: doc.id, ...data });
                     }
                 });
                 setPotentialMatches(users);
@@ -160,21 +162,43 @@ const Swipe = () => {
                     color: 'white'
                 }}>
                     <h3 style={{ fontSize: '2rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '10px', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
-                        {currentUser.name}, {currentUser.age}
+                        {currentUser.name}{currentUser.age ? `, ${currentUser.age}` : ''}
                     </h3>
-                    <p style={{ fontSize: '1.1rem', opacity: 0.9, lineHeight: 1.4, marginBottom: '1rem' }}>"{currentUser.bio}"</p>
+                    <p style={{ fontSize: '1.1rem', opacity: 0.9, lineHeight: 1.4, marginBottom: '1rem' }}>
+                        {currentUser.bio ? `"${currentUser.bio}"` : "Seeking a meaningful connection..."}
+                    </p>
 
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                        <span style={{
-                            fontSize: '0.75rem', padding: '6px 12px',
-                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                            borderRadius: '20px',
-                            color: 'white',
-                            backdropFilter: 'blur(5px)'
-                        }}>
-                            {currentUser.positive[0]}
-                        </span>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '1rem' }}>
+                        {(currentUser.positive || []).slice(0, 3).map((trait, i) => (
+                            <span key={i} style={{
+                                fontSize: '0.7rem', padding: '4px 10px',
+                                backgroundColor: 'rgba(100, 255, 218, 0.2)',
+                                border: '1px solid var(--color-accent)',
+                                borderRadius: '12px',
+                                color: 'var(--color-accent)',
+                                backdropFilter: 'blur(5px)'
+                            }}>
+                                {trait}
+                            </span>
+                        ))}
+                        {(currentUser.traumas || []).slice(0, 2).map((trait, i) => (
+                            <span key={i} style={{
+                                fontSize: '0.7rem', padding: '4px 10px',
+                                backgroundColor: 'rgba(255, 68, 68, 0.1)',
+                                border: '1px solid #ff4444',
+                                borderRadius: '12px',
+                                color: '#ff4444',
+                                backdropFilter: 'blur(5px)'
+                            }}>
+                                {trait}
+                            </span>
+                        ))}
                     </div>
+                    {currentUser.location && (
+                        <div style={{ fontSize: '0.8rem', opacity: 0.7, display: 'flex', alignItems: 'center', gap: '5px' }}>
+                            📍 {currentUser.location}
+                        </div>
+                    )}
                 </div>
             </div>
 
