@@ -5,6 +5,7 @@ import Swipe from './pages/Swipe';
 import Chat from './pages/Chat';
 import Profile from './pages/Profile';
 import Auth from './pages/Auth';
+import Assessment from './pages/Assessment';
 import Layout from './components/Layout';
 
 // Simple Context for App State
@@ -20,6 +21,7 @@ function App() {
                 <div className="app-shell">
                     <Routes>
                         <Route path="/auth" element={!user ? <Auth /> : <Navigate to="/" />} />
+                        <Route path="/assessment" element={user ? <Assessment /> : <Navigate to="/auth" />} />
 
                         <Route path="/" element={user ? <Layout /> : <Navigate to="/auth" />}>
                             <Route index element={<Home />} />

@@ -21,7 +21,7 @@ const Auth = () => {
                 traumas: ["Anxiety"]
             });
             setIsLoading(false);
-            navigate('/');
+            navigate('/assessment');
         }, 1500);
     };
 
