@@ -164,23 +164,45 @@ const Profile = () => {
             <div style={{ marginBottom: '2rem' }}>
                 <label style={{ display: 'block', marginBottom: '1rem', color: 'var(--color-text-muted)', textAlign: 'center' }}>Emotional Aspects</label>
 
-                <div style={{ display: 'flex', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                <div style={{
+                    display: 'flex',
+                    padding: '4px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                    borderRadius: '14px',
+                    marginBottom: '1.5rem',
+                    border: '1px solid rgba(255, 255, 255, 0.05)',
+                    position: 'relative'
+                }}>
                     <button
                         onClick={() => setActiveTab('positive')}
                         style={{
-                            flex: 1, padding: '10px',
-                            borderBottom: activeTab === 'positive' ? '2px solid var(--color-secondary)' : 'none',
-                            color: activeTab === 'positive' ? 'var(--color-secondary)' : 'var(--color-text-muted)',
-                            background: 'transparent'
+                            flex: 1,
+                            padding: '12px',
+                            borderRadius: '10px',
+                            border: 'none',
+                            color: activeTab === 'positive' ? 'var(--color-primary)' : 'var(--color-text-muted)',
+                            background: activeTab === 'positive' ? 'var(--color-secondary)' : 'transparent',
+                            fontWeight: '700',
+                            fontSize: '0.9rem',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            zIndex: 1
                         }}
                     >Positive</button>
                     <button
                         onClick={() => setActiveTab('negative')}
                         style={{
-                            flex: 1, padding: '10px',
-                            borderBottom: activeTab === 'negative' ? '2px solid #ff4444' : 'none',
-                            color: activeTab === 'negative' ? '#ff4444' : 'var(--color-text-muted)',
-                            background: 'transparent'
+                            flex: 1,
+                            padding: '12px',
+                            borderRadius: '10px',
+                            border: 'none',
+                            color: activeTab === 'negative' ? 'white' : 'var(--color-text-muted)',
+                            background: activeTab === 'negative' ? '#ff4444' : 'transparent',
+                            fontWeight: '700',
+                            fontSize: '0.9rem',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            zIndex: 1
                         }}
                     >Traumas / Deep</button>
                 </div>
