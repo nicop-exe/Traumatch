@@ -4,7 +4,7 @@ import { ThumbsUp, ThumbsDown, Info, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import { db } from '../firebase';
-import { collection, query, getDocs, where, limit } from 'firebase/firestore';
+import { collection, query, getDocs, where, limit, doc, setDoc } from 'firebase/firestore';
 import { MapPin } from 'lucide-react'; // Added MapPin
 
 const Swipe = () => {
@@ -13,6 +13,15 @@ const Swipe = () => {
     const [currentIndex, setCurrentIndex] = React.useState(0);
     const [isLoading, setIsLoading] = React.useState(true);
     const navigate = useNavigate();
+
+    // Helper to get high quality Google photos
+    const getHighResPhoto = (url) => {
+        if (!url) return null;
+        if (url.includes('googleusercontent.com')) {
+            return url.replace('=s96-c', '=s600-c');
+        }
+        return url;
+    };
 
     // Fetch real users from Firestore
     React.useEffect(() => {
@@ -89,13 +98,24 @@ const Swipe = () => {
 
         if (direction === 'right') {
             const { score, reasons } = calculateMatchScore(user, currentUser);
-            const threshold = 30;
+            const threshold = 15; // Lowered to be more generous
 
             if (score > threshold) {
                 const reason = reasons.length > 0 ? reasons[0] : "Mysterious Spark";
                 if (!matches.find(m => m.id === currentUser.id)) {
-                    setMatches([...matches, { ...currentUser, matchReason: reason, matchScore: score }]);
-                    alert(`Soul Bond Found! Strength: ${score}% - ${reason}`);
+                    const matchData = { ...currentUser, matchReason: reason, matchScore: score, timestamp: new Date() };
+
+                    // Persist to Firestore
+                    try {
+                        await setDoc(doc(db, "users", user.uid, "matches", currentUser.id), matchData);
+                        setMatches([...matches, matchData]);
+                        alert(`Soul Bond Found! Strength: ${score}% - ${reason}`);
+                    } catch (e) {
+                        console.error("Error saving match:", e);
+                        // Fallback to local only if Firestore fails
+                        setMatches([...matches, matchData]);
+                        alert(`Soul Bond Found! (Local only due to void interference)`);
+                    }
                 }
             } else {
                 alert(`Faded connection (${score}%). Moving on...`);
@@ -150,7 +170,7 @@ const Swipe = () => {
                 display: 'flex', flexDirection: 'column' // Ensure content stretches
             }}>
                 <img
-                    src={currentUser.avatar || currentUser.photoURL || "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1000"}
+                    src={getHighResPhoto(currentUser.avatar || currentUser.photoURL) || "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1000"}
                     alt={currentUser.name}
                     style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.9 }}
                 />

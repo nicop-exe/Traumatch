@@ -1,7 +1,9 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { AppContext } from '../App';
 import * as Tone from 'tone';
-import { Mic, Send, Play, ChevronLeft, Lock } from 'lucide-react';
+import { Mic, Send, Play, ChevronLeft, Lock, Info } from 'lucide-react';
+import { db } from '../firebase';
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 
 const Chat = () => {
     const { matches } = useContext(AppContext);
@@ -10,6 +12,35 @@ const Chat = () => {
     const [isRecording, setIsRecording] = useState(false);
     const [recorder, setRecorder] = useState(null);
     const [inputText, setInputText] = useState("");
+    const { setMatches, user } = useContext(AppContext);
+
+    // Fetch persistent matches from Firestore
+    useEffect(() => {
+        const fetchMatches = async () => {
+            if (!user) return;
+            try {
+                const q = query(collection(db, "users", user.uid, "matches"), orderBy("timestamp", "desc"));
+                const querySnapshot = await getDocs(q);
+                const fetchedMatches = [];
+                querySnapshot.forEach((doc) => {
+                    fetchedMatches.push({ id: doc.id, ...doc.data() });
+                });
+                setMatches(fetchedMatches);
+            } catch (e) {
+                console.error("Error fetching matches:", e);
+            }
+        };
+
+        fetchMatches();
+    }, [user, setMatches]);
+
+    const getHighResPhoto = (url) => {
+        if (!url) return null;
+        if (url.includes('googleusercontent.com')) {
+            return url.replace('=s96-c', '=s600-c');
+        }
+        return url;
+    };
 
     // Initialize Tone.js Recorder
     useEffect(() => {
@@ -92,7 +123,7 @@ const Chat = () => {
                                 onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.03)'}
                             >
                                 <img
-                                    src={match.avatar || match.photoURL || "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1000"}
+                                    src={getHighResPhoto(match.avatar || match.photoURL) || "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1000"}
                                     alt={match.name}
                                     style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,215,0,0.2)' }}
                                 />
@@ -120,7 +151,7 @@ const Chat = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <button onClick={() => setSelectedMatch(null)} className="icon-btn"><ChevronLeft color="white" /></button>
                     <img
-                        src={selectedMatch.avatar || selectedMatch.photoURL || "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1000"}
+                        src={getHighResPhoto(selectedMatch.avatar || selectedMatch.photoURL) || "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1000"}
                         alt={selectedMatch.name}
                         style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
                     />
