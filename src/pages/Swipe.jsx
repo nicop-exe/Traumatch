@@ -9,7 +9,7 @@ const MOCK_USERS = [
         name: "Elena",
         age: 23,
         bio: "Trying to find peace in chaos.",
-        avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=500&q=60",
+        avatar: "https://via.placeholder.com/500/0a192f/ffd700?text=Elena",
         traumas: ["Anxiety", "Trust Issues"],
         positive: ["Empathetic", "Creative"]
     },
@@ -18,7 +18,7 @@ const MOCK_USERS = [
         name: "Marcus",
         age: 27,
         bio: "Music is my escape.",
-        avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=500&q=60",
+        avatar: "https://via.placeholder.com/500/0a192f/ffd700?text=Marcus",
         traumas: ["Loneliness", "Burnout"],
         positive: ["Resilient", "Passionate"]
     },
@@ -27,7 +27,7 @@ const MOCK_USERS = [
         name: "Sophia",
         age: 25,
         bio: "Art heals everything.",
-        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=500&q=60",
+        avatar: "https://via.placeholder.com/500/0a192f/ffd700?text=Sophia",
         traumas: ["Perfectionism", "Sensitive"],
         positive: ["Kind", "Artistic"]
     }
