@@ -9,9 +9,12 @@ const Assessment = () => {
     const [step, setStep] = React.useState(0);
     const [answers, setAnswers] = React.useState({});
 
-    const questions = [
+    const INTERESTS = ["Music", "Poetry", "Gaming", "Meditation", "Fitness", "Coding", "Art", "Philosophy", "Psychology", "Travel", "Astrology", "Nature", "Cooking", "Photography"];
+
+    const QUESTION_POOL = [
         {
             id: 'q1',
+            type: 'single',
             text: "How do you usually process a difficult day?",
             options: [
                 { label: "I isolate and reflect in silence", trait: "Deep Thinker", type: 'positive' },
@@ -22,6 +25,7 @@ const Assessment = () => {
         },
         {
             id: 'q2',
+            type: 'single',
             text: "What is your biggest fear in a relationship?",
             options: [
                 { label: "Being misunderstood", trait: "Sensitive", type: 'positive' },
@@ -32,18 +36,64 @@ const Assessment = () => {
         },
         {
             id: 'q3',
-            text: "Which of these sounds most like your 'Safe Space'?",
+            type: 'single',
+            text: "When you look at the stars, what do you feel?",
             options: [
-                { label: "A rainy window with a book", trait: "Melancholic", type: 'trauma' },
-                { label: "A high-energy concert", trait: "Passionate", type: 'positive' },
-                { label: "A quiet forest path", trait: "Peaceful", type: 'positive' },
-                { label: "My bed, hiding from the world", trait: "Avoidant", type: 'trauma' }
+                { label: "Small and insignificant", trait: "Existential Dread", type: 'trauma' },
+                { label: "Connected to everything", trait: "Spiritual", type: 'positive' },
+                { label: "Curiosity and wonder", trait: "Inquisitive", type: 'positive' },
+                { label: "A sense of deep loneliness", trait: "Loneliness", type: 'trauma' }
+            ]
+        },
+        {
+            id: 'q4',
+            type: 'single',
+            text: "How do you handle conflict with others?",
+            options: [
+                { label: "I shut down and avoid it", trait: "Avoidant", type: 'trauma' },
+                { label: "I try to keep the peace at any cost", trait: "People Pleaser", type: 'trauma' },
+                { label: "I face it head-on with honesty", trait: "Direct", type: 'positive' },
+                { label: "I use humor to deflect", trait: "Witty", type: 'positive' }
+            ]
+        },
+        {
+            id: 'q5',
+            type: 'single',
+            text: "What does 'home' mean to you?",
+            options: [
+                { label: "A place where I can hide", trait: "Introverted", type: 'positive' },
+                { label: "A person, not a place", trait: "Romantic", type: 'positive' },
+                { label: "Somewhere I haven't found yet", trait: "Restless Soul", type: 'trauma' },
+                { label: "Chaos and noise", trait: "Family Trauma", type: 'trauma' }
+            ]
+        },
+        {
+            id: 'q6',
+            type: 'single',
+            text: "What is your 'guilty pleasure' when feeling down?",
+            options: [
+                { label: "Sad movies and crying", trait: "Melancholic", type: 'trauma' },
+                { label: "Eating my feelings", trait: "Emotional Eater", type: 'trauma' },
+                { label: "Cleaning everything", trait: "Perfectionist", type: 'positive' },
+                { label: "Sleeping for 12 hours", trait: "Exhausted", type: 'trauma' }
             ]
         }
     ];
 
-    const handleAnswer = (option) => {
-        const newAnswers = { ...answers, [step]: option };
+    // Core Onboarding + Randomized Subset
+    const questions = React.useMemo(() => {
+        const mandatory = [
+            { id: 'intent', type: 'intent', text: "What kind of soul-connection are you seeking today?" },
+            { id: 'interests', type: 'multiselect', text: "Which frequencies do you tune into? (Pick your interests)", options: INTERESTS }
+        ];
+        const shuffledPool = [...QUESTION_POOL].sort(() => 0.5 - Math.random());
+        return [...mandatory, ...shuffledPool.slice(0, 4)]; // 2 fixed + 4 random
+    }, []);
+
+    const currentQuestion = questions[step];
+
+    const handleAnswer = (value) => {
+        const newAnswers = { ...answers, [currentQuestion.id]: value };
         setAnswers(newAnswers);
 
         if (step < questions.length - 1) {
@@ -53,22 +103,38 @@ const Assessment = () => {
         }
     };
 
-    const finishAssessment = (finalAnswers) => {
-        const selectedPositive = Object.values(finalAnswers)
+    const finishAssessment = async (finalAnswers) => {
+        // Collect all traits from the various question formats
+        const extraTraits = Object.values(finalAnswers)
+            .filter(a => a && typeof a === 'object' && a.trait);
+
+        const selectedPositive = extraTraits
             .filter(a => a.type === 'positive')
             .map(a => a.trait);
 
-        const selectedTraumas = Object.values(finalAnswers)
+        const selectedTraumas = extraTraits
             .filter(a => a.type === 'trauma')
             .map(a => a.trait);
 
-        setUser({
-            ...user,
+        const profileUpdate = {
             positive: [...new Set([...(user?.positive || []), ...selectedPositive])],
-            traumas: [...new Set([...(user?.traumas || []), ...selectedTraumas])]
-        });
+            traumas: [...new Set([...(user?.traumas || []), ...selectedTraumas])],
+            intent: finalAnswers.intent || "",
+            interests: finalAnswers.interests || []
+        };
 
-        navigate('/');
+        try {
+            if (user?.uid) {
+                const { db } = await import('../firebase');
+                const { doc, updateDoc } = await import('firebase/firestore');
+                await updateDoc(doc(db, "users", user.uid), profileUpdate);
+            }
+            setUser({ ...user, ...profileUpdate });
+            navigate('/');
+        } catch (e) {
+            console.error("Error updating profile:", e);
+            navigate('/');
+        }
     };
 
     return (
