@@ -68,7 +68,7 @@ const Profile = () => {
                 alert("✨ Profile & Emotional Data synced with the sanctuary!");
             } catch (e) {
                 console.error("Error saving profile:", e);
-                alert("The void rejected your changes. Please try again.");
+                alert(`The void rejected your changes: ${e.message}. Please check your connection.`);
             } finally {
                 setIsSaving(false);
             }

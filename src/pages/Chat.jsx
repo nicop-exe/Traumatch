@@ -91,7 +91,11 @@ const Chat = () => {
                                 onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.06)'}
                                 onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.03)'}
                             >
-                                <img src={match.avatar} alt={match.name} style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,215,0,0.2)' }} />
+                                <img
+                                    src={match.avatar || match.photoURL || "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1000"}
+                                    alt={match.name}
+                                    style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,215,0,0.2)' }}
+                                />
                                 <div>
                                     <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{match.name}</div>
                                     <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>Click to chat</div>
@@ -115,7 +119,11 @@ const Chat = () => {
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <button onClick={() => setSelectedMatch(null)} className="icon-btn"><ChevronLeft color="white" /></button>
-                    <img src={selectedMatch.avatar} alt={selectedMatch.name} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
+                    <img
+                        src={selectedMatch.avatar || selectedMatch.photoURL || "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1000"}
+                        alt={selectedMatch.name}
+                        style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
+                    />
                     <span style={{ fontWeight: 'bold' }}>{selectedMatch.name}</span>
                 </div>
             </div>

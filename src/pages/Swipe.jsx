@@ -1,6 +1,6 @@
 import React, { useContext, useState, useMemo } from 'react';
 import { AppContext } from '../App';
-import { X, Heart, Info, AlertCircle } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, Info, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import { db } from '../firebase';
@@ -194,7 +194,7 @@ const Swipe = () => {
                         boxShadow: '0 5px 20px rgba(255, 68, 68, 0.2)'
                     }}
                 >
-                    <X size={32} />
+                    <ThumbsDown size={32} />
                 </button>
 
                 <button
@@ -208,7 +208,7 @@ const Swipe = () => {
                         boxShadow: '0 5px 20px rgba(100, 255, 218, 0.2)'
                     }}
                 >
-                    <Heart size={32} />
+                    <ThumbsUp size={32} />
                 </button>
             </div>
         </div>
