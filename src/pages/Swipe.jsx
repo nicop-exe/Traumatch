@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { db } from '../firebase';
 import { collection, query, getDocs, where, limit } from 'firebase/firestore';
+import { MapPin } from 'lucide-react'; // Added MapPin
 
 const Swipe = () => {
     const { matches, setMatches, user } = React.useContext(AppContext);
@@ -172,35 +173,10 @@ const Swipe = () => {
                         {currentUser.bio ? `"${currentUser.bio}"` : "Seeking a meaningful connection..."}
                     </p>
 
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '1rem' }}>
-                        {(currentUser.positive || []).slice(0, 3).map((trait, i) => (
-                            <span key={i} style={{
-                                fontSize: '0.7rem', padding: '4px 10px',
-                                backgroundColor: 'rgba(100, 255, 218, 0.2)',
-                                border: '1px solid var(--color-accent)',
-                                borderRadius: '12px',
-                                color: 'var(--color-accent)',
-                                backdropFilter: 'blur(5px)'
-                            }}>
-                                {trait}
-                            </span>
-                        ))}
-                        {(currentUser.traumas || []).slice(0, 2).map((trait, i) => (
-                            <span key={i} style={{
-                                fontSize: '0.7rem', padding: '4px 10px',
-                                backgroundColor: 'rgba(255, 68, 68, 0.1)',
-                                border: '1px solid #ff4444',
-                                borderRadius: '12px',
-                                color: '#ff4444',
-                                backdropFilter: 'blur(5px)'
-                            }}>
-                                {trait}
-                            </span>
-                        ))}
-                    </div>
                     {currentUser.location && (
-                        <div style={{ fontSize: '0.8rem', opacity: 0.7, display: 'flex', alignItems: 'center', gap: '5px' }}>
-                            📍 {currentUser.location}
+                        <div style={{ fontSize: '0.85rem', opacity: 0.8, display: 'flex', alignItems: 'center', gap: '8px', marginTop: '0.5rem' }}>
+                            <MapPin size={14} color="var(--color-accent)" />
+                            {currentUser.location}
                         </div>
                     )}
                 </div>
