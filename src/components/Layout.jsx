@@ -11,7 +11,7 @@ const Layout = () => {
         left: '50%',
         transform: 'translateX(-50%)',
         width: '100%',
-        maxWidth: '480px', // Constrain same as app-shell on desktop
+        maxWidth: 'inherit', // Follow app-shell's maxWidth automatically
         backgroundColor: 'var(--color-primary)',
         borderTop: '1px solid rgba(255, 215, 0, 0.2)',
         display: 'flex',
@@ -19,11 +19,6 @@ const Layout = () => {
         padding: '1rem 0 calc(1rem + env(safe-area-inset-bottom)) 0',
         zIndex: 1000
     };
-
-    // Responsive tweak for mobile
-    if (window.innerWidth < 1024) {
-        navStyle.maxWidth = '100%';
-    }
 
     const linkStyle = (path) => ({
         color: location.pathname === path ? 'var(--color-secondary)' : 'var(--color-text-muted)',

@@ -72,10 +72,10 @@ const Chat = () => {
 
     if (!selectedMatch) {
         return (
-            <div style={{ padding: '1rem' }}>
-                <h2 style={{ color: 'var(--color-secondary)', marginBottom: '1rem' }}>Matches</h2>
+            <div className="page-container">
+                <h2 style={{ color: 'var(--color-secondary)', marginBottom: '1.5rem', fontSize: '1.8rem', fontWeight: '800' }}>Matches</h2>
                 {matches.length === 0 ? (
-                    <p style={{ color: 'var(--color-text-muted)' }}>No matches yet. Go swipe!</p>
+                    <p style={{ color: 'var(--color-text-muted)', textAlign: 'center', marginTop: '3rem' }}>No matches yet. Go swipe!</p>
                 ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         {matches.map(match => (
@@ -84,14 +84,17 @@ const Chat = () => {
                                 onClick={() => setSelectedMatch(match)}
                                 style={{
                                     display: 'flex', alignItems: 'center', gap: '15px',
-                                    padding: '10px', backgroundColor: 'rgba(255,255,255,0.05)',
-                                    borderRadius: '10px', cursor: 'pointer'
+                                    padding: '1rem', backgroundColor: 'rgba(255,255,255,0.03)',
+                                    borderRadius: '16px', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.05)',
+                                    transition: 'background 0.2s'
                                 }}
+                                onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.06)'}
+                                onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.03)'}
                             >
-                                <img src={match.avatar} alt={match.name} style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover' }} />
+                                <img src={match.avatar} alt={match.name} style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,215,0,0.2)' }} />
                                 <div>
-                                    <div style={{ fontWeight: 'bold' }}>{match.name}</div>
-                                    <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Click to chat</div>
+                                    <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{match.name}</div>
+                                    <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>Click to chat</div>
                                 </div>
                             </div>
                         ))}
