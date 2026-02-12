@@ -23,12 +23,12 @@ const Profile = () => {
     // Sync local state if user context updates (e.g. initial fetch delay)
     React.useEffect(() => {
         if (user) {
-            if (!bio && user.bio) setBio(user.bio);
-            if (!location && user.location) setLocation(user.location);
-            if (positiveTraits.length === 0 && user.positive?.length > 0) setPositiveTraits(user.positive || []);
-            if (negativeTraits.length === 0 && user.traumas?.length > 0) setNegativeTraits(user.traumas || []);
+            setBio(prev => prev || user.bio || "");
+            setLocation(prev => prev || user.location || "");
+            setPositiveTraits(prev => prev.length === 0 ? (user.positive || []) : prev);
+            setNegativeTraits(prev => prev.length === 0 ? (user.traumas || []) : prev);
         }
-    }, [user, bio, location, positiveTraits.length, negativeTraits.length]);
+    }, [user]);
 
     const handleAddTrait = () => {
         if (!newTrait.trim()) return;
@@ -52,7 +52,7 @@ const Profile = () => {
         if (user) {
             setIsSaving(true);
             const profileUpdate = {
-                name: user?.name || "Soul",
+                name: user?.name || "New Soul",
                 email: user?.email || "",
                 avatar: user?.avatar || "",
                 bio: bio || "",

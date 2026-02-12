@@ -12,6 +12,7 @@ const Chat = () => {
     const [isRecording, setIsRecording] = useState(false);
     const [recorder, setRecorder] = useState(null);
     const [inputText, setInputText] = useState("");
+    const [isLoadingMatches, setIsLoadingMatches] = useState(true);
     const { setMatches, user } = useContext(AppContext);
 
     // Fetch persistent matches from Firestore
@@ -19,7 +20,8 @@ const Chat = () => {
         const fetchMatches = async () => {
             if (!user) return;
             try {
-                const q = query(collection(db, "users", user.uid, "matches"), orderBy("timestamp", "desc"));
+                // Remove orderBy for now to ensure all matches show up even without timestamp
+                const q = query(collection(db, "users", user.uid, "matches"));
                 const querySnapshot = await getDocs(q);
                 const fetchedMatches = [];
                 querySnapshot.forEach((doc) => {
@@ -28,6 +30,8 @@ const Chat = () => {
                 setMatches(fetchedMatches);
             } catch (e) {
                 console.error("Error fetching matches:", e);
+            } finally {
+                setIsLoadingMatches(false);
             }
         };
 
@@ -137,7 +141,11 @@ const Chat = () => {
         return (
             <div className="page-container">
                 <h2 style={{ color: 'var(--color-secondary)', marginBottom: '1.5rem', fontSize: '1.8rem', fontWeight: '800' }}>Matches</h2>
-                {matches.length === 0 ? (
+                {isLoadingMatches ? (
+                    <div style={{ textAlign: 'center', marginTop: '3rem' }}>
+                        <div className="animate-pulse" style={{ color: 'var(--color-secondary)' }}>Gathering souls...</div>
+                    </div>
+                ) : matches.length === 0 ? (
                     <p style={{ color: 'var(--color-text-muted)', textAlign: 'center', marginTop: '3rem' }}>No matches yet. Go swipe!</p>
                 ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>

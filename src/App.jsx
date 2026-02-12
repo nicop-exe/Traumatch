@@ -28,9 +28,9 @@ function App() {
                 setUser({
                     uid: firebaseUser.uid,
                     email: firebaseUser.email,
+                    ...data,
                     name: data.name || firebaseUser.displayName || 'New Soul',
-                    avatar: data.avatar || firebaseUser.photoURL || "",
-                    ...data
+                    avatar: data.avatar || firebaseUser.photoURL || ""
                 });
             } else {
                 setUser(null);
