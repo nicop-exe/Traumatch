@@ -5,6 +5,16 @@ import { Home, Heart, MessageCircle, User } from 'lucide-react';
 const Layout = () => {
     const location = useLocation();
 
+    const linkStyle = (path) => ({
+        color: location.pathname === path ? 'var(--color-secondary)' : 'var(--color-text-muted)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        fontSize: '0.8rem',
+        textDecoration: 'none',
+        flex: 1
+    });
+
     const navStyle = {
         position: 'fixed',
         bottom: 0,
