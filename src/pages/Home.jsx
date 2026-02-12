@@ -9,7 +9,14 @@ const Home = () => {
     ];
 
     return (
-        <div style={{ padding: '2rem 1rem', maxWidth: '800px', margin: '0 auto' }}>
+        <div style={{
+            padding: '2rem 1rem 120px 1rem', // Bottom padding for nav
+            maxWidth: '800px',
+            margin: '0 auto',
+            height: '100%',
+            overflowY: 'auto',
+            WebkitOverflowScrolling: 'touch'
+        }}>
             <h1 style={{ color: 'var(--color-secondary)', fontSize: '2rem', marginBottom: '2rem', textAlign: 'center' }}>Welcome Home</h1>
 
             <section style={{ marginBottom: '2rem' }}>

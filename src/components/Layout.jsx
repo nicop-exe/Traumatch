@@ -32,9 +32,8 @@ const Layout = () => {
         <div className="container" style={{ position: 'relative' }}>
             <div style={{
                 flex: 1,
-                overflowY: 'auto',
-                paddingBottom: '100px', // Space for nav
-                WebkitOverflowScrolling: 'touch' // Smooth scroll on iOS
+                overflow: 'hidden', // Delegate scrolling to pages
+                position: 'relative'
             }}>
                 <Outlet />
             </div>

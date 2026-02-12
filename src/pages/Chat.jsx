@@ -102,12 +102,13 @@ const Chat = () => {
     }
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', paddingBottom: '80px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative' }}>
             {/* Header */}
             <div style={{
                 padding: '10px', borderBottom: '1px solid rgba(255,255,255,0.1)',
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                background: 'var(--color-primary)'
+                background: 'var(--color-primary)',
+                zIndex: 10
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <button onClick={() => setSelectedMatch(null)}><ChevronLeft color="white" /></button>
@@ -117,7 +118,15 @@ const Chat = () => {
             </div>
 
             {/* Messages */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{
+                flex: 1,
+                overflowY: 'auto',
+                padding: '1rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1rem',
+                paddingBottom: '20px' // Space above input
+            }}>
                 {messages.map((msg, idx) => (
                     <div key={idx} style={{
                         alignSelf: msg.sender === 'me' ? 'flex-end' : 'flex-start',
@@ -137,8 +146,16 @@ const Chat = () => {
                 ))}
             </div>
 
-            {/* Input */}
-            <div style={{ padding: '10px', display: 'flex', gap: '10px', alignItems: 'center', background: 'var(--color-primary)' }}>
+            {/* Input - Fixed above nav */}
+            <div style={{
+                padding: '10px',
+                display: 'flex',
+                gap: '10px',
+                alignItems: 'center',
+                background: 'var(--color-primary)',
+                borderTop: '1px solid rgba(255,255,255,0.1)',
+                paddingBottom: 'calc(85px + env(safe-area-inset-bottom))' // Clear nav
+            }}>
                 <button
                     onClick={handleRecordToggle}
                     style={{
