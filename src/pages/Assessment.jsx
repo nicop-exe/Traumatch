@@ -1,13 +1,13 @@
-import React, { useState, useContext } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../App';
 import { ShieldCheck, ChevronRight, SkipForward } from 'lucide-react';
 
 const Assessment = () => {
-    const { user, setUser } = useContext(AppContext);
+    const { user, setUser } = React.useContext(AppContext);
     const navigate = useNavigate();
-    const [step, setStep] = useState(0);
-    const [answers, setAnswers] = useState({});
+    const [step, setStep] = React.useState(0);
+    const [answers, setAnswers] = React.useState({});
 
     const questions = [
         {

@@ -1,4 +1,5 @@
-import React, { useContext, useState } from 'react';
+```
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../App';
 import { auth, db, googleProvider } from '../firebase';
@@ -6,17 +7,17 @@ import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithP
 import { doc, setDoc } from 'firebase/firestore';
 
 const Auth = () => {
-    const { setUser } = useContext(AppContext);
+    const { setUser } = React.useContext(AppContext);
     const navigate = useNavigate();
-    const [isLogin, setIsLogin] = useState(true);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLogin, setIsLogin] = React.useState(true);
+    const [isLoading, setIsLoading] = React.useState(false);
 
     // Form fields
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [name, setName] = useState("");
-    const [phone, setPhone] = useState("");
-    const [error, setError] = useState("");
+    const [email, setEmail] = React.useState("");
+    const [password, setPassword] = React.useState("");
+    const [name, setName] = React.useState("");
+    const [phone, setPhone] = React.useState("");
+    const [error, setError] = React.useState("");
 
     const handleAuth = async (e) => {
         e.preventDefault();
