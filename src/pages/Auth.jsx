@@ -26,7 +26,15 @@ const Auth = () => {
     };
 
     return (
-        <div className="container" style={{ justifyContent: 'center', alignItems: 'center', padding: '2rem', textAlign: 'center' }}>
+        <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: '2rem',
+            textAlign: 'center',
+            height: '100%'
+        }}>
             <h1 style={{ color: 'var(--color-secondary)', fontSize: '3rem', marginBottom: '1rem' }}>Traumatch</h1>
             <p style={{ marginBottom: '3rem', color: 'var(--color-text-muted)' }}>Connect through what matters deeply.</p>
 

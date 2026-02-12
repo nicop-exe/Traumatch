@@ -102,7 +102,7 @@ const Chat = () => {
     }
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
             {/* Header */}
             <div style={{
                 padding: '10px', borderBottom: '1px solid rgba(255,255,255,0.1)',
@@ -125,7 +125,7 @@ const Chat = () => {
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '1rem',
-                paddingBottom: '20px' // Space above input
+                WebkitOverflowScrolling: 'touch'
             }}>
                 {messages.map((msg, idx) => (
                     <div key={idx} style={{
@@ -146,7 +146,7 @@ const Chat = () => {
                 ))}
             </div>
 
-            {/* Input - Fixed above nav */}
+            {/* Input area style adjustment for fixed nav in Layout */}
             <div style={{
                 padding: '10px',
                 display: 'flex',
@@ -154,7 +154,7 @@ const Chat = () => {
                 alignItems: 'center',
                 background: 'var(--color-primary)',
                 borderTop: '1px solid rgba(255,255,255,0.1)',
-                paddingBottom: 'calc(85px + env(safe-area-inset-bottom))' // Clear nav
+                paddingBottom: '20px' // Just a bit of padding above safe area in Layout
             }}>
                 <button
                     onClick={handleRecordToggle}

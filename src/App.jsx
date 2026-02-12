@@ -17,7 +17,7 @@ function App() {
     return (
         <AppContext.Provider value={{ user, setUser, matches, setMatches }}>
             <Router>
-                <div className="container">
+                <div className="app-shell">
                     <Routes>
                         <Route path="/auth" element={!user ? <Auth /> : <Navigate to="/" />} />
 

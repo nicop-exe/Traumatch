@@ -57,12 +57,7 @@ const Profile = () => {
     if (!user) return <div style={{ padding: '2rem', textAlign: 'center' }}>Please log in.</div>;
 
     return (
-        <div style={{
-            padding: '2rem 1rem 120px 1rem', // Bottom padding for nav
-            height: '100%',
-            overflowY: 'auto',
-            WebkitOverflowScrolling: 'touch'
-        }}>
+        <div style={{ padding: '2rem 1rem', maxWidth: '600px', margin: '0 auto' }}>
             <h2 style={{ color: 'var(--color-secondary)', textAlign: 'center', marginBottom: '2rem' }}>Edit Profile</h2>
 
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '2rem' }}>
