@@ -2,12 +2,6 @@ import React from 'react';
 import { Music, TrendingUp, Radio } from 'lucide-react';
 
 const Home = () => {
-    const recommendations = [
-        { type: 'music', title: 'Melancholy Lo-Fi', subtitle: 'To soothe your anxiety', icon: <Music /> },
-        { type: 'news', title: 'Understanding Attachment Styles', subtitle: 'Psychology Today', icon: <TrendingUp /> },
-        { type: 'podcast', title: 'The Trauma Cleanup', subtitle: 'Episode 4: Healing', icon: <Radio /> },
-    ];
-
     const { user } = useContext(AppContext);
 
     const getPersonalizedRecs = () => {
