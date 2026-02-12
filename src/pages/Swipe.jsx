@@ -125,17 +125,20 @@ const Swipe = () => {
     }
 
     return (
-        <div style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: '1rem' }}>
+    return (
+        <div style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: '1rem', maxWidth: '600px', margin: '0 auto' }}>
             <h2 style={{ textAlign: 'center', color: 'var(--color-text)', marginBottom: '1rem', letterSpacing: '2px', textTransform: 'uppercase', fontSize: '0.9rem' }}>Discover Souls</h2>
 
             <div style={{
                 flex: 1,
+                width: '100%',
                 backgroundColor: 'var(--color-primary)',
                 borderRadius: '20px',
                 overflow: 'hidden',
                 position: 'relative',
                 boxShadow: '0 15px 35px rgba(0,0,0,0.5)',
-                border: '1px solid rgba(255,255,255,0.05)'
+                border: '1px solid rgba(255,255,255,0.05)',
+                display: 'flex', flexDirection: 'column' // Ensure content stretches
             }}>
                 <img
                     src={currentUser.avatar}
@@ -159,7 +162,7 @@ const Swipe = () => {
                     </h3>
                     <p style={{ fontSize: '1.1rem', opacity: 0.9, lineHeight: 1.4, marginBottom: '1rem' }}>"{currentUser.bio}"</p>
 
-                    <div style={{ display: 'flex', gap: '8px' }}>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                         <span style={{
                             fontSize: '0.75rem', padding: '6px 12px',
                             backgroundColor: 'rgba(255, 215, 0, 0.15)',
@@ -184,7 +187,7 @@ const Swipe = () => {
                 </div>
             </div>
 
-            <div style={{ height: '100px', display: 'flex', justifyContent: 'space-evenly', alignItems: 'center', marginTop: '1.5rem' }}>
+            <div style={{ height: '100px', display: 'flex', justifyContent: 'space-evenly', alignItems: 'center', padding: '1rem 0' }}>
                 <button
                     onClick={() => handleSwipe('left')}
                     className="btn-action"

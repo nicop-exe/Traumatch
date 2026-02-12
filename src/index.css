@@ -61,12 +61,14 @@ a {
 /* Utilities */
 .container {
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;
+  /* Use fixed height for app-like feel */
   background: radial-gradient(circle at top right, #112240 0%, #0a192f 100%);
   display: flex;
   flex-direction: column;
   position: relative;
   overflow: hidden;
+  /* Prevent body scroll, handle inside components */
 }
 
 /* Tablet and Desktop: Center and constrain */

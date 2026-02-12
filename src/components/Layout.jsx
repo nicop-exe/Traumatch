@@ -6,17 +6,15 @@ const Layout = () => {
     const location = useLocation();
 
     const navStyle = {
-        position: 'fixed',
+        position: 'absolute', // Changed from fixed to absolute to stay within container
         bottom: 0,
-        left: '50%',
-        transform: 'translateX(-50%)',
+        left: 0,
         width: '100%',
-        maxWidth: '480px',
         backgroundColor: 'var(--color-primary)',
         borderTop: '1px solid rgba(255, 215, 0, 0.2)',
         display: 'flex',
         justifyContent: 'space-around',
-        padding: '1rem 0',
+        padding: '1rem 0 calc(1rem + env(safe-area-inset-bottom)) 0', // Safe area for iOS
         zIndex: 100
     };
 
@@ -26,12 +24,18 @@ const Layout = () => {
         flexDirection: 'column',
         alignItems: 'center',
         fontSize: '0.8rem',
-        textDecoration: 'none'
+        textDecoration: 'none',
+        flex: 1
     });
 
     return (
-        <div className="container">
-            <div style={{ flex: 1, overflowY: 'auto', paddingBottom: '80px' }}>
+        <div className="container" style={{ position: 'relative' }}>
+            <div style={{
+                flex: 1,
+                overflowY: 'auto',
+                paddingBottom: '100px', // Space for nav
+                WebkitOverflowScrolling: 'touch' // Smooth scroll on iOS
+            }}>
                 <Outlet />
             </div>
             <nav style={navStyle}>
