@@ -37,11 +37,7 @@ const Swipe = () => {
                 const users = [];
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
-                    const isCurrentUser =
-                        doc.id === user.uid ||
-                        (data.email && data.email === user.email) ||
-                        (data.name && data.name === user.name);
-
+                    const isCurrentUser = doc.id === user.uid;
                     const alreadyMatched = matchedIds.includes(doc.id);
 
                     if (!isCurrentUser && !alreadyMatched) {

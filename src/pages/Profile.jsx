@@ -9,7 +9,8 @@ const Profile = () => {
     const [isSaving, setIsSaving] = useState(false);
     const fileInputRef = useRef(null);
 
-    // Trait State
+    // State
+    const [name, setName] = useState(user?.name || "");
     const [bio, setBio] = useState(user?.bio || "");
     const [location, setLocation] = useState(user?.location || "");
     const [isLocationPrivate, setIsLocationPrivate] = useState(true);
@@ -23,6 +24,7 @@ const Profile = () => {
     // Sync local state if user context updates (e.g. initial fetch delay)
     React.useEffect(() => {
         if (user) {
+            setName(prev => prev || user.name || "");
             setBio(prev => prev || user.bio || "");
             setLocation(prev => prev || user.location || "");
             setPositiveTraits(prev => prev.length === 0 ? (user.positive || []) : prev);
@@ -52,7 +54,7 @@ const Profile = () => {
         if (user) {
             setIsSaving(true);
             const profileUpdate = {
-                name: user?.name || "New Soul",
+                name: name || user?.name || "New Soul",
                 email: user?.email || "",
                 avatar: user?.avatar || "",
                 bio: bio || "",
@@ -178,11 +180,20 @@ const Profile = () => {
                         <Camera size={18} />
                     </button>
                 </div>
-                <h3 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--color-secondary)' }}>{user?.name || 'Soul'}</h3>
+                <div style={{ width: '100%', maxWidth: '300px' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>Display Name</label>
+                    <input
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Your name..."
+                        style={{ fontSize: '1.2rem', textAlign: 'center', fontWeight: 'bold' }}
+                    />
+                </div>
             </div>
 
             <div style={{ marginBottom: '1.5rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-muted)' }}>Bio</label>
+                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>Bio</label>
                 <textarea
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
