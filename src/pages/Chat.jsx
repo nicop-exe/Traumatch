@@ -15,8 +15,13 @@ const Chat = () => {
     const [isLoadingMatches, setIsLoadingMatches] = useState(true);
     const { setMatches, user } = useContext(AppContext);
 
-    // Matches are now handled globally in App.jsx and passed via context/props
-    // If you need to re-fetch manually, you can still use the global setMatches
+    // Sync loading state with global matches
+    useEffect(() => {
+        if (user) {
+            // Once we have a user and matches (even empty), we are no longer "loading" initial state
+            setIsLoadingMatches(false);
+        }
+    }, [user, matches]);
 
     const getHighResPhoto = (url) => {
         if (!url) return null;
