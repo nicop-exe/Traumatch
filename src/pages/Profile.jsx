@@ -1,5 +1,7 @@
 import React, { useContext, useState, useRef } from 'react';
 import { AppContext } from '../App';
+import { db } from '../firebase';
+import { doc, updateDoc } from 'firebase/firestore';
 import { Camera, MapPin, Lock, Globe } from 'lucide-react';
 
 const Profile = () => {
@@ -34,10 +36,19 @@ const Profile = () => {
         }
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (user) {
-            setUser({ ...user, bio, positive: positiveTraits, traumas: negativeTraits });
-            alert("Profile & Emotional Data saved!");
+            const profileUpdate = { bio, positive: positiveTraits, traumas: negativeTraits, location };
+            try {
+                if (user.uid) {
+                    await updateDoc(doc(db, "users", user.uid), profileUpdate);
+                }
+                setUser({ ...user, ...profileUpdate });
+                alert("Profile & Emotional Data saved!");
+            } catch (e) {
+                console.error("Error saving profile:", e);
+                alert("Error saving profile. Please try again.");
+            }
         } else {
             alert("Error: No user logged in.");
         }
@@ -155,22 +166,28 @@ const Profile = () => {
                 </div>
             </div>
 
-            <div style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '8px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <MapPin size={20} color="var(--color-secondary)" />
-                    <div>
+            <div style={{ marginBottom: '2rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', backgroundColor: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <MapPin size={20} color="var(--color-secondary)" />
                         <div style={{ fontWeight: 'bold' }}>Location</div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>New York, USA</div>
                     </div>
+                    <button
+                        onClick={() => setIsLocationPrivate(!isLocationPrivate)}
+                        className="icon-btn"
+                        style={{ color: isLocationPrivate ? 'var(--color-accent)' : 'var(--color-text-muted)', gap: '5px', borderRadius: '8px' }}
+                    >
+                        {isLocationPrivate ? <Lock size={16} /> : <Globe size={16} />}
+                        <span style={{ fontSize: '0.8rem' }}>{isLocationPrivate ? 'Private' : 'Public'}</span>
+                    </button>
                 </div>
-                <button
-                    onClick={() => setIsLocationPrivate(!isLocationPrivate)}
-                    className="icon-btn"
-                    style={{ color: isLocationPrivate ? 'var(--color-accent)' : 'var(--color-text-muted)', gap: '5px', borderRadius: '8px' }}
-                >
-                    {isLocationPrivate ? <Lock size={16} /> : <Globe size={16} />}
-                    <span style={{ fontSize: '0.8rem' }}>{isLocationPrivate ? 'Private' : 'Public'}</span>
-                </button>
+                <input
+                    type="text"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    placeholder="City, Country"
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', marginTop: '0.5rem' }}
+                />
             </div>
 
             <button className="btn" style={{ width: '100%' }} onClick={handleSave}>Save Changes</button>

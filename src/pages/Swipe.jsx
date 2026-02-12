@@ -164,17 +164,6 @@ const Swipe = () => {
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                         <span style={{
                             fontSize: '0.75rem', padding: '6px 12px',
-                            backgroundColor: 'rgba(255, 215, 0, 0.15)',
-                            border: '1px solid rgba(255, 215, 0, 0.3)',
-                            borderRadius: '20px',
-                            color: 'var(--color-secondary)',
-                            fontWeight: '600',
-                            letterSpacing: '0.5px'
-                        }}>
-                            HIDDEN DEPTHS
-                        </span>
-                        <span style={{
-                            fontSize: '0.75rem', padding: '6px 12px',
                             backgroundColor: 'rgba(255, 255, 255, 0.1)',
                             borderRadius: '20px',
                             color: 'white',
