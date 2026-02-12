@@ -102,11 +102,18 @@ const Chat = () => {
         );
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
-            const newMessages = [];
-            snapshot.forEach((doc) => {
-                newMessages.push(doc.data());
-            });
+            const newMessages = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
             setMessages(newMessages);
+        }, (error) => {
+            console.error("Chat listener error:", error);
+            // Fallback: fetch without ordering if index is missing
+            const fallbackQ = query(collection(db, "chats", chatId, "messages"));
+            getDocs(fallbackQ).then(snap => {
+                setMessages(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+            });
         });
 
         return () => unsubscribe();

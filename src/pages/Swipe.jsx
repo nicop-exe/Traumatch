@@ -30,7 +30,7 @@ const Swipe = () => {
             setIsLoading(true);
             try {
                 // In a real app, we'd filter out already swiped users here
-                const q = query(collection(db, "users"), limit(40));
+                const q = query(collection(db, "users"), limit(100));
                 const querySnapshot = await getDocs(q);
                 const matchedIds = matches.map(m => m.id || m.uid);
 
@@ -44,7 +44,8 @@ const Swipe = () => {
                         users.push({ id: doc.id, uid: doc.id, ...data });
                     }
                 });
-                setPotentialMatches(users);
+                // Shuffle locally for a fresher feel
+                setPotentialMatches(users.sort(() => 0.5 - Math.random()));
             } catch (e) {
                 console.error("Error fetching matches:", e);
             } finally {

@@ -93,7 +93,7 @@ const Home = () => {
             </section>
 
             <section>
-                <h3 style={{ marginBottom: '1.2rem', color: 'var(--color-accent)', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '2px', fontWeight: 'bold' }}>Curated For Your Soul</h3>
+                <h3 style={{ marginBottom: '1.2rem', color: 'var(--color-accent)', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '2px', fontWeight: 'bold' }}>Curated For Your Journey</h3>
                 <div style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
