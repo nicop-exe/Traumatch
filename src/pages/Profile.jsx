@@ -65,6 +65,33 @@ const Profile = () => {
         }
     };
 
+    const fetchCitySuggestions = async (query) => {
+        if (query.length < 3) {
+            setSuggestions([]);
+            return;
+        }
+        setIsSearching(true);
+        try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=5&featuretype=city`);
+            const data = await response.json();
+            setSuggestions(data.map(item => ({
+                display_name: item.display_name,
+                city: item.address.city || item.address.town || item.address.village || item.display_name.split(',')[0]
+            })));
+        } catch (e) {
+            console.error("Error fetching cities:", e);
+        } finally {
+            setIsSearching(false);
+        }
+    };
+
+    const handleLocationChange = (val) => {
+        setLocation(val);
+        // Debounce simple
+        const timeoutId = setTimeout(() => fetchCitySuggestions(val), 500);
+        return () => clearTimeout(timeoutId);
+    };
+
     if (!user) return <div style={{ padding: '2rem', textAlign: 'center' }}>Please log in.</div>;
 
     return (
@@ -181,13 +208,43 @@ const Profile = () => {
                         <span style={{ fontSize: '0.8rem' }}>{isLocationPrivate ? 'Private' : 'Public'}</span>
                     </button>
                 </div>
-                <input
-                    type="text"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    placeholder="City, Country"
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', marginTop: '0.5rem' }}
-                />
+                <div style={{ position: 'relative' }}>
+                    <input
+                        type="text"
+                        value={location}
+                        onChange={(e) => handleLocationChange(e.target.value)}
+                        placeholder="Search your city..."
+                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', marginTop: '0.5rem', width: '100%' }}
+                    />
+                    {suggestions.length > 0 && (
+                        <div style={{
+                            position: 'absolute', top: '100%', left: 0, right: 0,
+                            backgroundColor: '#0a192f', border: '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: '8px', zIndex: 100, marginTop: '5px',
+                            maxHeight: '200px', overflowY: 'auto', boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
+                        }}>
+                            {suggestions.map((s, idx) => (
+                                <div
+                                    key={idx}
+                                    onClick={() => {
+                                        setLocation(s.display_name);
+                                        setSuggestions([]);
+                                    }}
+                                    style={{
+                                        padding: '10px 15px', color: 'white', cursor: 'pointer',
+                                        borderBottom: '1px solid rgba(255,255,255,0.05)',
+                                        fontSize: '0.85rem'
+                                    }}
+                                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'}
+                                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                                >
+                                    {s.display_name}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    {isSearching && <div style={{ position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-20%)', fontSize: '0.7rem', color: 'var(--color-accent)' }}>Searching...</div>}
+                </div>
             </div>
 
             <button className="btn" style={{ width: '100%' }} onClick={handleSave}>Save Changes</button>
