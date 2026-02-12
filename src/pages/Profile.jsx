@@ -8,12 +8,18 @@ const Profile = () => {
     const { user, setUser } = useContext(AppContext);
 
     // Initialize with safe defaults
-    const [bio, setBio] = useState(user?.bio || "");
-    const [location, setLocation] = useState(user?.location || "");
-    const [isLocationPrivate, setIsLocationPrivate] = useState(true);
-    const [suggestions, setSuggestions] = useState([]);
-    const [isSearching, setIsSearching] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
     const fileInputRef = useRef(null);
+
+    // Sync local state if user context updates (e.g. initial fetch delay)
+    React.useEffect(() => {
+        if (user) {
+            if (!bio && user.bio) setBio(user.bio);
+            if (!location && user.location) setLocation(user.location);
+            if (positiveTraits.length === 0 && user.positive?.length > 0) setPositiveTraits(user.positive);
+            if (negativeTraits.length === 0 && user.traumas?.length > 0) setNegativeTraits(user.traumas);
+        }
+    }, [user]);
 
     // Trait State
     const [positiveTraits, setPositiveTraits] = useState(user?.positive || []);
@@ -41,6 +47,7 @@ const Profile = () => {
 
     const handleSave = async () => {
         if (user) {
+            setIsSaving(true);
             const profileUpdate = {
                 name: user?.name || "Soul",
                 email: user?.email || "",
@@ -55,13 +62,15 @@ const Profile = () => {
                     await setDoc(doc(db, "users", user.uid), profileUpdate, { merge: true });
                 }
                 setUser({ ...user, ...profileUpdate });
-                alert("Profile & Emotional Data saved!");
+                alert("✨ Profile & Emotional Data synced with the sanctuary!");
             } catch (e) {
                 console.error("Error saving profile:", e);
-                alert("Error saving profile. Please try again.");
+                alert("The void rejected your changes. Please try again.");
+            } finally {
+                setIsSaving(false);
             }
         } else {
-            alert("Error: No user logged in.");
+            alert("Error: No soul detected. Please log in.");
         }
     };
 
@@ -178,6 +187,7 @@ const Profile = () => {
                         type="text"
                         value={newTrait}
                         onChange={(e) => setNewTrait(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleAddTrait()}
                         placeholder={`Add ${activeTab} trait...`}
                         style={{ margin: 0 }}
                     />
@@ -258,7 +268,14 @@ const Profile = () => {
                 </div>
             </div>
 
-            <button className="btn" style={{ width: '100%' }} onClick={handleSave}>Save Changes</button>
+            <button
+                className={`btn ${isSaving ? 'animate-pulse' : ''}`}
+                style={{ width: '100%', opacity: isSaving ? 0.7 : 1 }}
+                onClick={handleSave}
+                disabled={isSaving}
+            >
+                {isSaving ? 'Syncing with Sanctuary...' : 'Save Changes'}
+            </button>
         </div>
     );
 };
