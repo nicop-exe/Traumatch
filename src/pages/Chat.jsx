@@ -206,9 +206,10 @@ const Chat = () => {
                         alignSelf: msg.senderId === user.uid ? 'flex-end' : 'flex-start',
                         backgroundColor: msg.senderId === user.uid ? 'var(--color-secondary)' : 'rgba(255,255,255,0.1)',
                         color: msg.senderId === user.uid ? 'var(--color-primary)' : 'white',
-                        padding: '10px 15px', borderRadius: '15px', maxWidth: '85%',
-                        borderBottomRightRadius: msg.senderId === user.uid ? '2px' : '15px',
-                        borderBottomLeftRadius: msg.senderId === user.uid ? '15px' : '2px'
+                        padding: '12px 18px', borderRadius: '18px', maxWidth: '75%',
+                        borderBottomRightRadius: msg.senderId === user.uid ? '2px' : '18px',
+                        borderBottomLeftRadius: msg.senderId === user.uid ? '18px' : '2px',
+                        boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
                     }}>
                         {msg.text && <p>{msg.text}</p>}
                         {msg.audio && (
@@ -222,14 +223,15 @@ const Chat = () => {
 
             {/* Input area style adjustment for fixed nav in Layout */}
             <div style={{
-                padding: '15px',
+                padding: '1.2rem 1.5rem',
                 display: 'flex',
-                gap: '10px',
+                gap: '12px',
                 alignItems: 'center',
-                background: 'rgba(10, 25, 47, 0.95)',
-                backdropFilter: 'blur(10px)',
-                borderTop: '1px solid rgba(255,255,255,0.05)',
-                paddingBottom: '25px'
+                background: 'rgba(10, 25, 47, 0.98)',
+                backdropFilter: 'blur(15px)',
+                borderTop: '1px solid rgba(255,255,255,0.1)',
+                paddingBottom: 'calc(var(--nav-height) + 1.5rem)', // Safe clearance for Navigation
+                boxShadow: '0 -10px 30px rgba(0,0,0,0.3)'
             }}>
                 <button
                     onClick={handleRecordToggle}
