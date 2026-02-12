@@ -23,6 +23,7 @@ function App() {
     React.useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
             if (firebaseUser) {
+                const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
                 const data = userDoc.exists() ? userDoc.data() : {};
                 setUser({
                     uid: firebaseUser.uid,
