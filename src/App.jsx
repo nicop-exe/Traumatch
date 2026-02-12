@@ -10,7 +10,7 @@ import Layout from './components/Layout';
 
 import { auth, db } from './firebase';
 import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, collection, onSnapshot } from "firebase/firestore";
 
 // Simple Context for App State
 export const AppContext = React.createContext(null);
@@ -21,23 +21,42 @@ function App() {
     const [isAppLoading, setIsAppLoading] = useState(true);
 
     React.useEffect(() => {
+        let matchesUnsubscribe = null;
+
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
             if (firebaseUser) {
+                // 1. Fetch User Profile
                 const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
                 const data = userDoc.exists() ? userDoc.data() : {};
                 setUser({
                     uid: firebaseUser.uid,
+                    id: firebaseUser.uid,
                     email: firebaseUser.email,
                     ...data,
                     name: data.name || firebaseUser.displayName || 'New Soul',
                     avatar: data.avatar || firebaseUser.photoURL || ""
                 });
+
+                // 2. Real-time Matches Sync
+                matchesUnsubscribe = onSnapshot(collection(db, "users", firebaseUser.uid, "matches"), (snapshot) => {
+                    const fetchedMatches = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                    setMatches(fetchedMatches);
+                });
             } else {
                 setUser(null);
+                setMatches([]);
+                if (matchesUnsubscribe) matchesUnsubscribe();
             }
             setIsAppLoading(false);
         });
-        return () => unsubscribe();
+
+        return () => {
+            unsubscribe();
+            if (matchesUnsubscribe) matchesUnsubscribe();
+        };
     }, []);
 
     if (isAppLoading) {

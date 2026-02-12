@@ -15,28 +15,8 @@ const Chat = () => {
     const [isLoadingMatches, setIsLoadingMatches] = useState(true);
     const { setMatches, user } = useContext(AppContext);
 
-    // Fetch persistent matches from Firestore
-    useEffect(() => {
-        const fetchMatches = async () => {
-            if (!user) return;
-            try {
-                // Remove orderBy for now to ensure all matches show up even without timestamp
-                const q = query(collection(db, "users", user.uid, "matches"));
-                const querySnapshot = await getDocs(q);
-                const fetchedMatches = [];
-                querySnapshot.forEach((doc) => {
-                    fetchedMatches.push({ id: doc.id, ...doc.data() });
-                });
-                setMatches(fetchedMatches);
-            } catch (e) {
-                console.error("Error fetching matches:", e);
-            } finally {
-                setIsLoadingMatches(false);
-            }
-        };
-
-        fetchMatches();
-    }, [user, setMatches]);
+    // Matches are now handled globally in App.jsx and passed via context/props
+    // If you need to re-fetch manually, you can still use the global setMatches
 
     const getHighResPhoto = (url) => {
         if (!url) return null;
@@ -170,7 +150,7 @@ const Chat = () => {
                                 onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.03)'}
                             >
                                 <img
-                                    src={getHighResPhoto(match.avatar || match.photoURL) || `https://ui-avatars.com/api/?background=0a192f&color=ffd700&name=${encodeURIComponent(match.name || 'Soul')}`}
+                                    src={getHighResPhoto(match.avatar || match.photoURL) || `https://ui-avatars.com/api/?background=0a192f&color=ffd700&name=${encodeURIComponent(match.name || 'New Soul')}`}
                                     alt={match.name}
                                     style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,215,0,0.2)' }}
                                 />

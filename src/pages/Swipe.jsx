@@ -54,7 +54,7 @@ const Swipe = () => {
         };
 
         fetchUsers();
-    }, [user]);
+    }, [user, matches]);
 
     const currentUser = currentIndex < potentialMatches.length ? potentialMatches[currentIndex] : null;
 
@@ -99,7 +99,7 @@ const Swipe = () => {
 
         if (direction === 'right') {
             const { score, reasons } = calculateMatchScore(user, currentUser);
-            const threshold = 15; // Lowered to be more generous
+            const threshold = 1; // Lowered to 1% for maximum discovery during testing
 
             if (score > threshold) {
                 const reason = reasons.length > 0 ? reasons[0] : "Mysterious Spark";
@@ -185,7 +185,7 @@ const Swipe = () => {
                 display: 'flex', flexDirection: 'column' // Ensure content stretches
             }}>
                 <img
-                    src={getHighResPhoto(currentUser.avatar || currentUser.photoURL) || `https://ui-avatars.com/api/?background=0a192f&color=ffd700&name=${encodeURIComponent(currentUser.name || 'Soul')}`}
+                    src={getHighResPhoto(currentUser.avatar || currentUser.photoURL) || `https://ui-avatars.com/api/?background=0a192f&color=ffd700&name=${encodeURIComponent(currentUser.name || 'New Soul')}`}
                     alt={currentUser.name}
                     style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.9 }}
                 />
