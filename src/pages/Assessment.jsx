@@ -126,8 +126,8 @@ const Assessment = () => {
         try {
             if (user?.uid) {
                 const { db } = await import('../firebase');
-                const { doc, updateDoc } = await import('firebase/firestore');
-                await updateDoc(doc(db, "users", user.uid), profileUpdate);
+                const { doc, setDoc } = await import('firebase/firestore');
+                await setDoc(doc(db, "users", user.uid), profileUpdate, { merge: true });
             }
             setUser({ ...user, ...profileUpdate });
             navigate('/');

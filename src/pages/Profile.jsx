@@ -1,7 +1,7 @@
 import React, { useContext, useState, useRef } from 'react';
 import { AppContext } from '../App';
 import { db } from '../firebase';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
 import { Camera, MapPin, Lock, Globe } from 'lucide-react';
 
 const Profile = () => {
@@ -44,7 +44,7 @@ const Profile = () => {
             const profileUpdate = { bio, positive: positiveTraits, traumas: negativeTraits, location };
             try {
                 if (user.uid) {
-                    await updateDoc(doc(db, "users", user.uid), profileUpdate);
+                    await setDoc(doc(db, "users", user.uid), profileUpdate, { merge: true });
                 }
                 setUser({ ...user, ...profileUpdate });
                 alert("Profile & Emotional Data saved!");
