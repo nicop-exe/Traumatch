@@ -117,7 +117,7 @@ const Assessment = () => {
             .map(a => a.trait);
 
         const profileUpdate = {
-            name: user?.name || "Soul",
+            name: user?.name || "New Soul",
             email: user?.email || "",
             avatar: user?.avatar || "",
             positive: [...new Set([...(user?.positive || []), ...selectedPositive])],
@@ -149,6 +149,7 @@ const Assessment = () => {
                     <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>Step {step + 1} of {questions.length}</span>
                 </div>
 
+                <h3 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--color-secondary)' }}>{user?.name || 'Searching...'}</h3>
                 <h3 style={{ fontSize: '1.5rem', marginBottom: '2rem', lineHeight: 1.3 }}>{questions[step].text}</h3>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>

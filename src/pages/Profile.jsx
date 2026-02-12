@@ -147,7 +147,7 @@ const Profile = () => {
                         <Camera size={18} />
                     </button>
                 </div>
-                <h3 style={{ fontSize: '1.5rem' }}>{user?.name}</h3>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--color-secondary)' }}>{user?.name || 'Soul'}</h3>
             </div>
 
             <div style={{ marginBottom: '1.5rem' }}>
