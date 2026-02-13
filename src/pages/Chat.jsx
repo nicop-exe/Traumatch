@@ -15,6 +15,7 @@ const Chat = () => {
     const [isLoadingMatches, setIsLoadingMatches] = useState(true);
     const { setMatches, user } = useContext(AppContext);
     const messagesEndRef = React.useRef(null);
+    const [showDebug, setShowDebug] = useState(false); // Debug toggle
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -248,7 +249,21 @@ const Chat = () => {
                     />
                     <span style={{ fontWeight: 'bold' }}>{selectedMatch.name}</span>
                 </div>
+                <button
+                    onClick={() => setShowDebug(!showDebug)}
+                    style={{ fontSize: '0.6rem', color: 'var(--color-text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}
+                >
+                    {showDebug ? 'Hide IDs' : 'Show IDs'}
+                </button>
             </div>
+
+            {showDebug && (
+                <div style={{ padding: '5px 10px', fontSize: '0.6rem', background: '#000', color: '#0f0', borderBottom: '1px solid #333' }}>
+                    <div>My UID: {user?.uid}</div>
+                    <div>Target ID: {selectedMatch?.id}</div>
+                    <div>Room: {[user?.uid, selectedMatch?.id].sort().join('_')}</div>
+                </div>
+            )}
 
             {/* Messages */}
             <div style={{
@@ -314,14 +329,14 @@ const Chat = () => {
 
             {/* Input area style adjustment for fixed nav in Layout */}
             <div style={{
-                padding: '0.6rem 1rem',
+                padding: '0.3rem 0.6rem', // Even less padding per user request
                 display: 'flex',
-                gap: '12px',
+                gap: '8px',
                 alignItems: 'center',
                 background: 'rgba(10, 25, 47, 0.98)',
                 backdropFilter: 'blur(15px)',
                 borderTop: '1px solid rgba(255,255,255,0.1)',
-                paddingBottom: 'calc(var(--nav-height) + 0.8rem)', // 50% less padding
+                paddingBottom: 'calc(var(--nav-height) + 0.3rem)', // Ultra-compact
                 boxShadow: '0 -10px 30px rgba(0,0,0,0.3)'
             }}>
                 <button
