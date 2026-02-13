@@ -80,6 +80,7 @@ const Chat = () => {
 
         // Consistent chatId: smallerUID_largerUID
         const chatId = [user.uid, selectedMatch.id || selectedMatch.uid].sort().join('_');
+        console.log("Joined Chat Sanctuary:", chatId);
 
         const q = query(
             collection(db, "chats", chatId, "messages"),
@@ -93,11 +94,14 @@ const Chat = () => {
             }));
             setMessages(newMessages);
         }, (error) => {
-            console.error("Chat listener error:", error);
-            // Fallback: fetch without ordering if index is missing
+            console.error("Chat listener primary error (ordering/index):", error);
+            // Robust Fallback: listen without ordering to ensure functionality despite index/metadata issues
             const fallbackQ = query(collection(db, "chats", chatId, "messages"));
-            getDocs(fallbackQ).then(snap => {
-                setMessages(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+            return onSnapshot(fallbackQ, (snap) => {
+                const msgs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                // Sort by internal timestamp manually if available
+                msgs.sort((a, b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0));
+                setMessages(msgs);
             });
         });
 
@@ -223,14 +227,14 @@ const Chat = () => {
 
             {/* Input area style adjustment for fixed nav in Layout */}
             <div style={{
-                padding: '1.2rem 1.5rem',
+                padding: '0.6rem 1rem',
                 display: 'flex',
                 gap: '12px',
                 alignItems: 'center',
                 background: 'rgba(10, 25, 47, 0.98)',
                 backdropFilter: 'blur(15px)',
                 borderTop: '1px solid rgba(255,255,255,0.1)',
-                paddingBottom: 'calc(var(--nav-height) + 1.5rem)', // Safe clearance for Navigation
+                paddingBottom: 'calc(var(--nav-height) + 0.8rem)', // 50% less padding
                 boxShadow: '0 -10px 30px rgba(0,0,0,0.3)'
             }}>
                 <button
