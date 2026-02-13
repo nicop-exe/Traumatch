@@ -3,7 +3,7 @@ import { AppContext } from '../App';
 import * as Tone from 'tone';
 import { Mic, Send, Play, ChevronLeft, Lock, Info } from 'lucide-react';
 import { db } from '../firebase';
-import { collection, getDocs, query, orderBy, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, onSnapshot, addDoc, setDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
 
 const Chat = () => {
     const { matches } = useContext(AppContext);
@@ -14,6 +14,15 @@ const Chat = () => {
     const [inputText, setInputText] = useState("");
     const [isLoadingMatches, setIsLoadingMatches] = useState(true);
     const { setMatches, user } = useContext(AppContext);
+    const messagesEndRef = React.useRef(null);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
 
     // Sync loading state with global matches
     useEffect(() => {
@@ -101,6 +110,8 @@ const Chat = () => {
             });
 
             setMessages(sortedMessages);
+            // Non-blocking scroll
+            setTimeout(scrollToBottom, 50);
         }, (error) => {
             console.error("Chat listener fatal error:", error);
             alert("Chat connection failed. Check your internet or Firestore rules.");
@@ -148,11 +159,12 @@ const Chat = () => {
 
         const chatId = getChatId(user.uid, selectedMatch.id);
         try {
-            await setDoc(doc(db, "chats", chatId, "messages", msgId), {
+            const msgRef = doc(db, "chats", chatId, "messages", msgId);
+            await updateDoc(msgRef, {
                 text: newText,
                 edited: true,
                 editedAt: serverTimestamp()
-            }, { merge: true });
+            });
         } catch (e) {
             console.error("Error editing message:", e);
             alert("Edit failed. You may not have permissions.");
@@ -164,11 +176,12 @@ const Chat = () => {
 
         const chatId = getChatId(user.uid, selectedMatch.id);
         try {
-            await setDoc(doc(db, "chats", chatId, "messages", msgId), {
+            const msgRef = doc(db, "chats", chatId, "messages", msgId);
+            await updateDoc(msgRef, {
                 deleted: true,
                 text: "Message deleted",
-                timestamp: serverTimestamp()
-            }, { merge: true });
+                deletedAt: serverTimestamp()
+            });
         } catch (e) {
             console.error("Error deleting message:", e);
             alert("Delete failed.");
@@ -296,6 +309,7 @@ const Chat = () => {
                         </div>
                     </div>
                 ))}
+                <div ref={messagesEndRef} />
             </div>
 
             {/* Input area style adjustment for fixed nav in Layout */}
