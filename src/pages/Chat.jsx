@@ -441,7 +441,7 @@ const Chat = () => {
                 alignItems: 'center',
                 background: 'rgba(10, 25, 47, 0.95)',
                 backdropFilter: 'blur(25px)',
-                paddingBottom: 'var(--nav-height)',
+                paddingBottom: 'calc(var(--nav-height) - 0.5rem)',
                 boxShadow: '0 -10px 40px rgba(0,0,0,0.5)',
                 position: 'relative',
                 zIndex: 100
