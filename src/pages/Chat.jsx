@@ -62,16 +62,26 @@ const Chat = () => {
 
     const handleRecordToggle = async () => {
         if (!recorder) {
-            const newRecorder = new Tone.Recorder();
-            const mic = new Tone.UserMedia();
             try {
+                // Ensure Tone context is started on first click
+                await Tone.start();
+
+                const newRecorder = new Tone.Recorder();
+                const mic = new Tone.UserMedia();
+
+                // Request permission
                 await mic.open();
                 mic.connect(newRecorder);
                 setRecorder(newRecorder);
-                alert("Microphone ready. Press again to record.");
+
+                alert("✨ Microphone Bonded! You can now record. Press again to start your soul note.");
                 return;
             } catch (e) {
-                alert("Permission denied. Enable microphone in settings.");
+                console.error("Mic error:", e);
+                const errorMsg = e.name === "NotAllowedError" || e.name === "PermissionDeniedError"
+                    ? "Microphone access denied. Please click the lock icon in your browser's address bar and 'Allow' the microphone, then refresh."
+                    : "Could not access microphone. Ensure no other app is using it.";
+                alert(errorMsg);
                 return;
             }
         }
@@ -84,6 +94,7 @@ const Chat = () => {
                 setIsRecording(true);
             } catch (e) {
                 console.error("Recording start error:", e);
+                alert("Oops! The void interfered. Try again.");
             }
         } else {
             // Stop recording
@@ -95,11 +106,9 @@ const Chat = () => {
                 const fileName = `audio_${Date.now()}.webm`;
                 const storageRef = ref(storage, `chats/${chatId}/${fileName}`);
 
-                // Upload
                 const snapshot = await uploadBytes(storageRef, recording);
                 const downloadURL = await getDownloadURL(snapshot.ref);
 
-                // Save to Firestore
                 await addDoc(collection(db, "chats", chatId, "messages"), {
                     audio: downloadURL,
                     senderId: user.uid,
@@ -107,7 +116,7 @@ const Chat = () => {
                 });
             } catch (e) {
                 console.error("Audio error:", e);
-                alert("Could not send audio. Check connection.");
+                alert("The note was lost in the void. Check connection.");
             } finally {
                 setIsUploading(false);
             }

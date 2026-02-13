@@ -25,16 +25,34 @@ function App() {
 
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
             if (firebaseUser) {
-                // 1. Fetch User Profile
-                const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
-                const data = userDoc.exists() ? userDoc.data() : {};
+                // 1. Fetch or Create User Profile
+                const userRef = doc(db, "users", firebaseUser.uid);
+                const userDoc = await getDoc(userRef);
+                let data = userDoc.exists() ? userDoc.data() : null;
+
+                if (!data) {
+                    // Initialize profile if new user (e.g. Google Login)
+                    data = {
+                        name: firebaseUser.displayName || 'New Soul',
+                        email: firebaseUser.email,
+                        avatar: firebaseUser.photoURL || "",
+                        createdAt: new Date().toISOString(),
+                        traumas: [],
+                        positive: [],
+                        interests: [],
+                        intent: ""
+                    };
+                    await setDoc(userRef, data);
+                } else if (!data.createdAt) {
+                    // Backfill createdAt if missing
+                    await setDoc(userRef, { createdAt: new Date().toISOString() }, { merge: true });
+                }
+
                 setUser({
                     uid: firebaseUser.uid,
                     id: firebaseUser.uid,
                     email: firebaseUser.email,
-                    ...data,
-                    name: data.name || firebaseUser.displayName || 'New Soul',
-                    avatar: data.avatar || firebaseUser.photoURL || ""
+                    ...data
                 });
 
                 // 2. Real-time Matches Sync
