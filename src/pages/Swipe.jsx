@@ -212,8 +212,10 @@ const Swipe = () => {
                 <p style={{ color: 'var(--color-text-muted)', marginBottom: '1rem' }}>
                     Has resonado con todas las almas disponibles o estás solo en el santuario.
                 </p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    <button className="btn" onClick={() => setCurrentIndex(0)}>Volver a Buscar</button>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
+                    <button className="btn" style={{ maxWidth: '240px', width: '100%' }} onClick={() => setCurrentIndex(0)}>
+                        Volver a Buscar
+                    </button>
                 </div>
             </div>
         );
