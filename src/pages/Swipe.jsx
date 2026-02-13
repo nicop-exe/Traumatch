@@ -56,12 +56,11 @@ const Swipe = () => {
             setIsLoading(false);
         }, (error) => {
             console.error("Critical Void Error:", error);
-            alert("The void is temporarily unstable. Attempting to reconnect...");
             setIsLoading(false);
         });
 
         return () => unsubscribe();
-    }, [user?.uid, matches.length]); // Re-sync if matches count changes
+    }, [user?.uid]); // Removed matches.length to prevent jumping during swipe
 
     const currentUser = currentIndex < potentialMatches.length ? potentialMatches[currentIndex] : null;
 
@@ -173,15 +172,13 @@ const Swipe = () => {
                         await setDoc(doc(db, "users", currentUser.id, "matches", user.uid), theirMatchData);
 
                         setMatches([...matches, myMatchData]);
-                        alert(`Soul Bond Found! Strength: ${score}% - ${reason}`);
                     } catch (e) {
                         console.error("Error saving match:", e);
                         setMatches([...matches, { ...currentUser, matchReason: reason, matchScore: score }]);
-                        alert(`Soul Bond Found! (Local only due to void interference)`);
                     }
                 }
             } else {
-                alert(`Faded connection (${score}%). Moving on...`);
+                console.log(`Faded connection (${score}%). Moving on...`);
             }
         }
         setCurrentIndex(prev => prev + 1);
@@ -196,34 +193,6 @@ const Swipe = () => {
         );
     }
 
-    const createDemoSoul = async () => {
-        try {
-            const demoId = `demo_${Math.floor(Math.random() * 10000)}`;
-            const demoSoul = {
-                name: "Soul Gemela",
-                bio: "Soy un alma errante buscando resonancia en el vacío.",
-                avatar: `https://ui-avatars.com/api/?background=random&color=fff&name=Soul+Gemela`,
-                traumas: user?.traumas || ["Soledad"],
-                positive: ["Empático", "Creativo"],
-                interests: user?.interests || ["Music"],
-                createdAt: new Date().toISOString(),
-                behavioralProfile: {
-                    archetype_name: "The Dreamer Explorer",
-                    calculated_indexes: {
-                        self_awareness_index: 80,
-                        security_vincular_index: 70,
-                        reactivity_index: 30,
-                        emotional_regulation_index: 85
-                    }
-                }
-            };
-            await setDoc(doc(db, "users", demoId), demoSoul);
-            alert("✨ ¡Un alma gemela ha entrado al santuario!");
-        } catch (e) {
-            console.error(e);
-            alert("Error invocando alma: " + e.message);
-        }
-    };
 
     if (isLoading) {
         return (
@@ -245,9 +214,6 @@ const Swipe = () => {
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     <button className="btn" onClick={() => setCurrentIndex(0)}>Volver a Buscar</button>
-                    <button className="btn btn-secondary" onClick={createDemoSoul} style={{ fontSize: '0.8rem', opacity: 0.8 }}>
-                        ✨ Invocar Alma de Prueba
-                    </button>
                 </div>
             </div>
         );
