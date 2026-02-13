@@ -254,8 +254,8 @@ const Swipe = () => {
     }
 
     return (
-        <div className="page-container" style={{ paddingBottom: 'calc(var(--nav-height) + 1rem)' }}>
-            <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+        <div className="page-container animate-fade-in">
+            <div className="p-page" style={{ textAlign: 'center' }}>
                 <h2 className="text-gradient" style={{ fontSize: '1.2rem', textTransform: 'uppercase', letterSpacing: '4px' }}>Discover Souls</h2>
             </div>
 

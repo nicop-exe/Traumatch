@@ -59,7 +59,7 @@ const Home = () => {
     const recommendations = getPersonalizedRecs();
 
     return (
-        <div className="page-container animate-fade-in">
+        <div className="page-container p-page animate-fade-in">
             <h1 className="text-gradient" style={{ fontSize: '2.5rem', marginBottom: '2rem', textAlign: 'center', fontWeight: '800' }}>Welcome Home</h1>
 
             <section style={{ marginBottom: '3rem' }}>

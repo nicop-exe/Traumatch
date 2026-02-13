@@ -156,8 +156,8 @@ const Profile = () => {
     const needsAssessment = !user?.behavioralProfile?.archetype_name;
 
     return (
-        <div className="page-container">
-            <h2 style={{ color: 'var(--color-secondary)', textAlign: 'center', marginBottom: '2rem' }}>Edit Profile</h2>
+        <div className="page-container p-page animate-fade-in">
+            <h2 className="text-gradient" style={{ textAlign: 'center', marginBottom: '2rem', fontSize: '1.8rem', fontWeight: '800' }}>Soul Profile</h2>
 
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '2rem' }}>
                 <div style={{ position: 'relative', width: '120px', height: '120px', marginBottom: '1rem' }}>

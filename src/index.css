@@ -99,11 +99,15 @@ body {
   width: 100%;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 1.5rem;
-  padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 2rem);
+  padding: 0;
+  padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 1rem);
   -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
+}
+
+.p-page {
+  padding: 1.5rem;
 }
 
 /* Center content vertically for specific pages (Auth, Home, Swipe) if needed */

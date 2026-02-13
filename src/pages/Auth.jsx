@@ -60,8 +60,8 @@ const Auth = () => {
     };
 
     return (
-        <div className="page-container" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%' }}>
-            <div className="animate-fade-in" style={{ backgroundColor: 'rgba(255,255,255,0.03)', padding: '2.5rem 2rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}>
+        <div className="page-container p-page" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%' }}>
+            <div className="animate-fade-in card" style={{ padding: '2.5rem 2rem', border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}>
                 <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
                     <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>🌌</div>
                     <h1 style={{ color: 'var(--color-secondary)', fontSize: '2.2rem', fontWeight: '800' }}>Traumatch</h1>

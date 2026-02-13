@@ -289,7 +289,7 @@ const Chat = () => {
 
     if (!selectedMatch) {
         return (
-            <div className="page-container">
+            <div className="page-container p-page">
                 <h2 style={{ color: 'var(--color-secondary)', marginBottom: '1.5rem', fontSize: '1.8rem', fontWeight: '800' }}>Matches</h2>
                 {isLoadingMatches ? (
                     <div style={{ textAlign: 'center', marginTop: '3rem' }}>

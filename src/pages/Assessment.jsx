@@ -223,7 +223,7 @@ const Assessment = () => {
     };
 
     return (
-        <div className="page-container" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '100%', padding: '2rem' }}>
+        <div className="page-container p-page" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '100%' }}>
             <div className="animate-fade-in card" style={{ padding: '2.5rem', marginBottom: 0 }}>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
