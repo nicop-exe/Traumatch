@@ -9,6 +9,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 const Chat = () => {
     const { matches, setMatches, user } = useContext(AppContext);
     const [selectedMatch, setSelectedMatch] = useState(null);
+    const [liveSelectedMatch, setLiveSelectedMatch] = useState(null);
     const [messages, setMessages] = useState([]); // { text, audio, sender }
     const [isRecording, setIsRecording] = useState(false);
     const [recorder, setRecorder] = useState(null);
@@ -40,26 +41,24 @@ const Chat = () => {
         return url;
     };
 
-    // Initialize Tone.js Recorder
+    // Real-time Profile Sync for Selected Match
     useEffect(() => {
-        const initAudio = async () => {
-            if (selectedMatch && !recorder) {
-                const newRecorder = new Tone.Recorder();
-                const mic = new Tone.UserMedia();
+        if (!selectedMatch?.id) {
+            setLiveSelectedMatch(null);
+            return;
+        }
 
-                try {
-                    await mic.open();
-                    mic.connect(newRecorder);
-                    setRecorder(newRecorder);
-                    console.log("Audio initialized");
-                } catch (e) {
-                    console.error("Mic access denied or error:", e);
-                }
+        // Listen to the actual user document to get the latest photo/name
+        const unsubscribe = onSnapshot(doc(db, "users", selectedMatch.id), (docSnap) => {
+            if (docSnap.exists()) {
+                setLiveSelectedMatch({ id: docSnap.id, ...docSnap.data() });
+            } else {
+                setLiveSelectedMatch(selectedMatch); // Fallback
             }
-        };
+        });
 
-        if (selectedMatch) initAudio();
-    }, [selectedMatch, recorder]);
+        return () => unsubscribe();
+    }, [selectedMatch]);
 
     const handleRecordToggle = async () => {
         if (!recorder) {
@@ -146,6 +145,45 @@ const Chat = () => {
         return () => unsubscribe();
     }, [user?.uid, selectedMatch?.id]);
 
+    // Sub-component for Match List Item to ensure live data (photos/names)
+    const MatchItem = ({ match, onClick }) => {
+        const [liveMatch, setLiveMatch] = useState(match);
+
+        useEffect(() => {
+            if (!match.id) return;
+            const unsubscribe = onSnapshot(doc(db, "users", match.id), (docSnap) => {
+                if (docSnap.exists()) {
+                    setLiveMatch({ id: docSnap.id, ...docSnap.data() });
+                }
+            });
+            return () => unsubscribe();
+        }, [match.id]);
+
+        return (
+            <div
+                onClick={() => onClick(liveMatch)}
+                style={{
+                    display: 'flex', alignItems: 'center', gap: '15px',
+                    padding: '1rem', backgroundColor: 'rgba(255,255,255,0.03)',
+                    borderRadius: '16px', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.05)',
+                    transition: 'background 0.2s'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.06)'}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.03)'}
+            >
+                <img
+                    src={getHighResPhoto(liveMatch.avatar || liveMatch.photoURL) || `https://ui-avatars.com/api/?background=0a192f&color=ffd700&name=${encodeURIComponent(liveMatch.name || 'New Soul')}`}
+                    alt={liveMatch.name}
+                    style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,215,0,0.2)' }}
+                />
+                <div>
+                    <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{liveMatch.name}</div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>Click to chat</div>
+                </div>
+            </div>
+        );
+    };
+
     const handleSendMessage = async () => {
         if (!inputText.trim() || !user?.uid || !selectedMatch?.id) return;
 
@@ -225,28 +263,7 @@ const Chat = () => {
                 ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         {matches.map(match => (
-                            <div
-                                key={match.id}
-                                onClick={() => setSelectedMatch(match)}
-                                style={{
-                                    display: 'flex', alignItems: 'center', gap: '15px',
-                                    padding: '1rem', backgroundColor: 'rgba(255,255,255,0.03)',
-                                    borderRadius: '16px', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.05)',
-                                    transition: 'background 0.2s'
-                                }}
-                                onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.06)'}
-                                onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.03)'}
-                            >
-                                <img
-                                    src={getHighResPhoto(match.avatar || match.photoURL) || `https://ui-avatars.com/api/?background=0a192f&color=ffd700&name=${encodeURIComponent(match.name || 'New Soul')}`}
-                                    alt={match.name}
-                                    style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,215,0,0.2)' }}
-                                />
-                                <div>
-                                    <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{match.name}</div>
-                                    <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>Click to chat</div>
-                                </div>
-                            </div>
+                            <MatchItem key={match.id} match={match} onClick={setSelectedMatch} />
                         ))}
                     </div>
                 )}
@@ -266,11 +283,11 @@ const Chat = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <button onClick={() => setSelectedMatch(null)} className="icon-btn"><ChevronLeft color="white" /></button>
                     <img
-                        src={getHighResPhoto(selectedMatch.avatar || selectedMatch.photoURL) || "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1000"}
-                        alt={selectedMatch.name}
+                        src={getHighResPhoto(liveSelectedMatch?.avatar || liveSelectedMatch?.photoURL) || "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1000"}
+                        alt={liveSelectedMatch?.name || 'Soul'}
                         style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
                     />
-                    <span style={{ fontWeight: 'bold' }}>{selectedMatch.name}</span>
+                    <span style={{ fontWeight: 'bold' }}>{liveSelectedMatch?.name || 'Loading...'}</span>
                 </div>
             </div>
 
