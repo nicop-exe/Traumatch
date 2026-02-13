@@ -1,3 +1,8 @@
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { AppContext } from '../App';
+import { ShieldCheck, ChevronRight, SkipForward } from 'lucide-react';
+import { serverTimestamp } from 'firebase/firestore';
 import { generateBehavioralProfile } from '../utils/behavioralEngine';
 
 const Assessment = () => {
