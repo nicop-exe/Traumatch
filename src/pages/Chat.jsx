@@ -17,6 +17,7 @@ const Chat = () => {
     const [inputText, setInputText] = useState("");
     const [isLoadingMatches, setIsLoadingMatches] = useState(true);
     const [isUploading, setIsUploading] = useState(false);
+    const [showDiagnostics, setShowDiagnostics] = useState(false);
     const messagesEndRef = React.useRef(null);
 
     const scrollToBottom = () => {
@@ -62,39 +63,65 @@ const Chat = () => {
     }, [selectedMatch]);
 
     const handleRecordToggle = async () => {
+        // Deep Security Check (Secure Context requirement)
+        if (!window.isSecureContext && window.location.hostname !== 'localhost') {
+            alert("🚨 Error de Seguridad: El micrófono NO funciona en redes locales sin HTTPS.\r\n\r\nEn iPhone/Android, debes usar una URL que empiece por https:// o estar en 'localhost'.");
+            return;
+        }
+
         if (isRecording && mediaRecorder) {
-            // STOP RECORDING
-            mediaRecorder.stop();
-            setIsRecording(false);
+            try {
+                mediaRecorder.stop();
+                setIsRecording(false);
+            } catch (e) {
+                console.error("Stop error:", e);
+                setIsRecording(false);
+                setMediaRecorder(null);
+            }
             return;
         }
 
         // START RECORDING
         try {
+            if (!navigator.mediaDevices || !window.MediaRecorder) {
+                throw new Error("Su navegador no soporta grabación de audio nativa.");
+            }
+
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-            // Detect best MIME type for the device
-            const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
-                ? 'audio/webm;codecs=opus'
-                : 'audio/mp4';
+            // Platform Optimization: iOS loves mp4, others love webm
+            let mimeType = 'audio/webm;codecs=opus';
+            if (!MediaRecorder.isTypeSupported(mimeType)) {
+                mimeType = 'audio/mp4'; // iOS fallback
+                if (!MediaRecorder.isTypeSupported(mimeType)) {
+                    mimeType = 'audio/aac'; // Ultimate fallback
+                }
+            }
 
             const recorder = new MediaRecorder(stream, { mimeType });
             const chunks = [];
 
             recorder.ondataavailable = (e) => {
-                if (e.data.size > 0) chunks.push(e.data);
+                if (e.data && e.data.size > 0) {
+                    chunks.push(e.data);
+                }
             };
 
             recorder.onstop = async () => {
                 const audioBlob = new Blob(chunks, { type: mimeType });
 
-                // Cleanup stream
+                // Track cleanup
                 stream.getTracks().forEach(track => track.stop());
+
+                if (audioBlob.size < 100) {
+                    console.error("Recording too short or empty");
+                    return;
+                }
 
                 setIsUploading(true);
                 try {
                     const chatId = getChatId(user.uid, selectedMatch.id);
-                    const extension = mimeType.includes('mp4') ? 'mp4' : 'webm';
+                    const extension = mimeType.includes('mp4') || mimeType.includes('aac') ? 'm4a' : 'webm';
                     const fileName = `audio_${Date.now()}.${extension}`;
                     const storageRef = ref(storage, `chats/${chatId}/${fileName}`);
 
@@ -105,22 +132,24 @@ const Chat = () => {
                         audio: downloadURL,
                         senderId: user.uid,
                         timestamp: serverTimestamp(),
-                        mimeType: mimeType // Store for player hint
+                        mimeType: mimeType
                     });
                 } catch (e) {
                     console.error("Upload error:", e);
-                    alert("Soul note lost in transmission. Check connection.");
+                    alert("No se pudo enviar el audio. Revisa tu conexión.");
                 } finally {
                     setIsUploading(false);
+                    setMediaRecorder(null);
                 }
             };
 
-            recorder.start();
+            // Start with a small timeslice to ensure dataavailable fires on all devices
+            recorder.start(200);
             setMediaRecorder(recorder);
             setIsRecording(true);
         } catch (e) {
-            console.error("Mic access error:", e);
-            alert("Microphone access denied. Please enable it in your browser settings.");
+            console.error("Full Mic Error:", e);
+            alert(`Error de Micrófono: ${e.message || "Acceso denegado"}.\r\n\r\nAsegúrate de haber dado permiso y estar en una conexión SEGURA (HTTPS).`);
         }
     };
 
@@ -301,8 +330,31 @@ const Chat = () => {
                         alt={liveSelectedMatch?.name || 'Soul'}
                         style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
                     />
-                    <span style={{ fontWeight: 'bold' }}>{liveSelectedMatch?.name || 'Loading...'}</span>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ fontWeight: 'bold' }}>{liveSelectedMatch?.name || 'Loading...'}</span>
+                        <div
+                            onClick={() => setShowDiagnostics(!showDiagnostics)}
+                            style={{ fontSize: '0.6rem', opacity: 0.5, cursor: 'pointer' }}
+                        >
+                            {showDiagnostics ? 'Hide Status' : 'Check Status'}
+                        </div>
+                    </div>
                 </div>
+
+                {showDiagnostics && (
+                    <div style={{
+                        position: 'absolute', top: '60px', left: '10px', right: '10px',
+                        background: 'rgba(0,0,0,0.9)', padding: '10px', borderRadius: '10px',
+                        fontSize: '0.7rem', zIndex: 100, border: '1px solid var(--color-secondary)'
+                    }}>
+                        <div style={{ color: 'var(--color-secondary)', fontWeight: 'bold', marginBottom: '5px' }}>Audio Diagnostics:</div>
+                        <div>Secure Context: {window.isSecureContext ? '✅ YES' : '❌ NO (HTTPS required for Mic)'}</div>
+                        <div>Media Support: {navigator.mediaDevices ? '✅ YES' : '❌ NO'}</div>
+                        <div>MediaRecorder: {window.MediaRecorder ? '✅ YES' : '❌ NO'}</div>
+                        <div>Supports WebM: {MediaRecorder && MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? '✅ YES' : '❌ NO'}</div>
+                        <div>Supports MP4: {MediaRecorder && MediaRecorder.isTypeSupported('audio/mp4') ? '✅ YES' : '❌ NO'}</div>
+                    </div>
+                )}
             </div>
 
             {/* Messages */}
