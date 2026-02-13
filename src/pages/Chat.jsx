@@ -1,7 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { AppContext } from '../App';
-import * as Tone from 'tone';
-import { Mic, Send, Play, ChevronLeft, Lock, Info } from 'lucide-react';
+import { Mic, Send, Play, ChevronLeft, Lock, Info, ShieldAlert } from 'lucide-react';
 import { db, storage } from '../firebase';
 import { collection, getDocs, query, orderBy, onSnapshot, addDoc, setDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -63,12 +62,13 @@ const Chat = () => {
     }, [selectedMatch]);
 
     const handleRecordToggle = async () => {
-        // Deep Security Check (Secure Context requirement)
+        // 1. SECURE CONTEXT CHECK (CRITICAL)
         if (!window.isSecureContext && window.location.hostname !== 'localhost') {
-            alert("🚨 Error de Seguridad: El micrófono NO funciona en redes locales sin HTTPS.\r\n\r\nEn iPhone/Android, debes usar una URL que empiece por https:// o estar en 'localhost'.");
+            alert("🚨 SEGURIDAD: El micrófono está BLOQUEADO por el navegador.\r\n\r\nMotivo: Tu conexión no es segura (falta HTTPS).\r\nSolución: En iPhone/Android, debes usar HTTPS o entrar vía 'localhost'.");
             return;
         }
 
+        // 2. STOP RECORDING
         if (isRecording && mediaRecorder) {
             try {
                 mediaRecorder.stop();
@@ -81,42 +81,32 @@ const Chat = () => {
             return;
         }
 
-        // START RECORDING
+        // 3. START RECORDING
         try {
             if (!navigator.mediaDevices || !window.MediaRecorder) {
-                throw new Error("Su navegador no soporta grabación de audio nativa.");
+                throw new Error("Este navegador no soporta grabación nativa.");
             }
 
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-            // Platform Optimization: iOS loves mp4, others love webm
-            let mimeType = 'audio/webm;codecs=opus';
-            if (!MediaRecorder.isTypeSupported(mimeType)) {
-                mimeType = 'audio/mp4'; // iOS fallback
-                if (!MediaRecorder.isTypeSupported(mimeType)) {
-                    mimeType = 'audio/aac'; // Ultimate fallback
-                }
-            }
+            // Platform MIME detection
+            const types = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/aac'];
+            let mimeType = types.find(type => MediaRecorder.isTypeSupported(type)) || '';
 
             const recorder = new MediaRecorder(stream, { mimeType });
             const chunks = [];
 
             recorder.ondataavailable = (e) => {
-                if (e.data && e.data.size > 0) {
-                    chunks.push(e.data);
-                }
+                if (e.data && e.data.size > 0) chunks.push(e.data);
             };
 
             recorder.onstop = async () => {
                 const audioBlob = new Blob(chunks, { type: mimeType });
 
-                // Track cleanup
+                // Cleanup
                 stream.getTracks().forEach(track => track.stop());
 
-                if (audioBlob.size < 100) {
-                    console.error("Recording too short or empty");
-                    return;
-                }
+                if (audioBlob.size < 100) return;
 
                 setIsUploading(true);
                 try {
@@ -136,20 +126,24 @@ const Chat = () => {
                     });
                 } catch (e) {
                     console.error("Upload error:", e);
-                    alert("No se pudo enviar el audio. Revisa tu conexión.");
+                    alert("Error al enviar soul note.");
                 } finally {
                     setIsUploading(false);
                     setMediaRecorder(null);
                 }
             };
 
-            // Start with a small timeslice to ensure dataavailable fires on all devices
-            recorder.start(200);
+            // Start recording (timeslice ensures data flow)
+            recorder.start(100);
             setMediaRecorder(recorder);
             setIsRecording(true);
         } catch (e) {
-            console.error("Full Mic Error:", e);
-            alert(`Error de Micrófono: ${e.message || "Acceso denegado"}.\r\n\r\nAsegúrate de haber dado permiso y estar en una conexión SEGURA (HTTPS).`);
+            console.error("Mic Access Failed:", e);
+            if (e.name === "NotAllowedError" || e.name === "PermissionDeniedError") {
+                alert("🔒 PERMISO DENEGADO: El navegador ha bloqueado el micrófono.\r\n\r\nVe a los ajustes de tu navegador o pulsa el candado en la barra de direcciones para Permitir el Micrófono.");
+            } else {
+                alert(`Error: ${e.message}`);
+            }
         }
     };
 
@@ -246,11 +240,10 @@ const Chat = () => {
     };
 
     const playAudio = (url) => {
-        // Use native audio player for playback as it's more robust for different MIME types
         const audio = new Audio(url);
         audio.play().catch(e => {
             console.error("Playback error:", e);
-            alert("Could not play soul note. Format might be incompatible.");
+            alert("Incompatible audio format.");
         });
     };
 
@@ -445,12 +438,12 @@ const Chat = () => {
                     className="icon-btn"
                     style={{
                         width: '45px', height: '45px',
-                        backgroundColor: isRecording ? '#ff4444' : 'rgba(255,255,255,0.05)',
+                        backgroundColor: isRecording ? '#ff4444' : (window.isSecureContext || window.location.hostname === 'localhost' ? 'rgba(255,255,255,0.05)' : 'rgba(255,0,0,0.1)'),
                         color: 'white',
                         border: isRecording ? 'none' : '1px solid rgba(255,255,255,0.1)'
                     }}
                 >
-                    <Mic size={20} className={isRecording ? 'animate-pulse' : ''} />
+                    {!window.isSecureContext && window.location.hostname !== 'localhost' ? <ShieldAlert size={20} color="#ff4444" /> : <Mic size={20} className={isRecording ? 'animate-pulse' : ''} />}
                 </button>
                 <input
                     type="text"
