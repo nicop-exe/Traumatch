@@ -28,7 +28,7 @@ const Swipe = () => {
         if (!user) return;
         setIsLoading(true);
 
-        const q = query(collection(db, "users"), limit(100));
+        const q = query(collection(db, "users"), orderBy("createdAt", "desc"), limit(100));
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
             const matchedIds = matches.map(m => m.id || m.uid);
             const users = [];
