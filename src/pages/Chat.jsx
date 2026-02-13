@@ -133,6 +133,43 @@ const Chat = () => {
         player.autostart = true;
     };
 
+    const formatTimestamp = (ts) => {
+        if (!ts) return '';
+        const date = ts.toDate ? ts.toDate() : new Date(ts);
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    };
+
+    const handleEditMessage = async (msgId, currentText) => {
+        const newText = prompt("Edit your message:", currentText);
+        if (newText === null || newText === currentText || !newText.trim()) return;
+
+        const chatId = [user.uid, selectedMatch.id || selectedMatch.uid].sort().join('_');
+        try {
+            await setDoc(doc(db, "chats", chatId, "messages", msgId), {
+                text: newText,
+                edited: true,
+                editedAt: serverTimestamp()
+            }, { merge: true });
+        } catch (e) {
+            console.error("Error editing message:", e);
+        }
+    };
+
+    const handleDeleteMessage = async (msgId) => {
+        if (!window.confirm("Delete this message?")) return;
+
+        const chatId = [user.uid, selectedMatch.id || selectedMatch.uid].sort().join('_');
+        try {
+            await setDoc(doc(db, "chats", chatId, "messages", msgId), {
+                deleted: true,
+                text: "Message deleted",
+                timestamp: serverTimestamp() // Optional: keep original
+            }, { merge: true });
+        } catch (e) {
+            console.error("Error deleting message:", e);
+        }
+    };
+
     if (!selectedMatch) {
         return (
             <div className="page-container">
@@ -206,21 +243,52 @@ const Chat = () => {
                 WebkitOverflowScrolling: 'touch'
             }}>
                 {messages.map((msg, idx) => (
-                    <div key={idx} style={{
-                        alignSelf: msg.senderId === user.uid ? 'flex-end' : 'flex-start',
-                        backgroundColor: msg.senderId === user.uid ? 'var(--color-secondary)' : 'rgba(255,255,255,0.1)',
-                        color: msg.senderId === user.uid ? 'var(--color-primary)' : 'white',
-                        padding: '12px 18px', borderRadius: '18px', maxWidth: '75%',
-                        borderBottomRightRadius: msg.senderId === user.uid ? '2px' : '18px',
-                        borderBottomLeftRadius: msg.senderId === user.uid ? '18px' : '2px',
-                        boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
-                    }}>
-                        {msg.text && <p>{msg.text}</p>}
-                        {msg.audio && (
-                            <button onClick={() => playAudio(msg.audio)} style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                <Play size={16} fill="currentColor" /> Audio Note
-                            </button>
+                    <div key={msg.id || idx}
+                        style={{
+                            alignSelf: msg.senderId === user.uid ? 'flex-end' : 'flex-start',
+                            backgroundColor: msg.senderId === user.uid ? 'var(--color-secondary)' : 'rgba(255,255,255,0.1)',
+                            color: msg.senderId === user.uid ? 'var(--color-primary)' : 'white',
+                            padding: '12px 18px', borderRadius: '18px', maxWidth: '75%',
+                            borderBottomRightRadius: msg.senderId === user.uid ? '2px' : '18px',
+                            borderBottomLeftRadius: msg.senderId === user.uid ? '18px' : '2px',
+                            boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+                            position: 'relative',
+                            transition: 'all 0.2s'
+                        }}
+                        onDoubleClick={() => msg.senderId === user.uid && !msg.deleted && handleEditMessage(msg.id, msg.text)}
+                    >
+                        {msg.deleted ? (
+                            <p style={{ fontStyle: 'italic', opacity: 0.6, fontSize: '0.9rem' }}>Message deleted</p>
+                        ) : (
+                            <>
+                                {msg.text && <p style={{ margin: 0 }}>{msg.text}</p>}
+                                {msg.audio && (
+                                    <button onClick={() => playAudio(msg.audio)} style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                        <Play size={16} fill="currentColor" /> Audio Note
+                                    </button>
+                                )}
+                            </>
                         )}
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'flex-end',
+                            alignItems: 'center',
+                            gap: '8px',
+                            marginTop: '4px',
+                            fontSize: '0.7rem',
+                            opacity: 0.7
+                        }}>
+                            {msg.edited && !msg.deleted && <span>(edited)</span>}
+                            <span>{formatTimestamp(msg.timestamp)}</span>
+                            {msg.senderId === user.uid && !msg.deleted && (
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); handleDeleteMessage(msg.id); }}
+                                    style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: '2px', opacity: 0.5 }}
+                                >
+                                    &times;
+                                </button>
+                            )}
+                        </div>
                     </div>
                 ))}
             </div>
@@ -253,6 +321,7 @@ const Chat = () => {
                     type="text"
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                     placeholder="Type a message..."
                     style={{ flex: 1, margin: 0, borderRadius: '20px' }}
                 />
