@@ -59,8 +59,8 @@ const Home = () => {
     const recommendations = getPersonalizedRecs();
 
     return (
-        <div className="page-container">
-            <h1 style={{ color: 'var(--color-secondary)', fontSize: '2.2rem', marginBottom: '2rem', textAlign: 'center', fontWeight: '800' }}>Welcome Home</h1>
+        <div className="page-container animate-fade-in">
+            <h1 className="text-gradient" style={{ fontSize: '2.5rem', marginBottom: '2rem', textAlign: 'center', fontWeight: '800' }}>Welcome Home</h1>
 
             <section style={{ marginBottom: '3rem' }}>
                 <h3 style={{ marginBottom: '1.2rem', color: 'var(--color-accent)', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '2px', fontWeight: 'bold' }}>Daily Mood Mix</h3>
@@ -72,16 +72,14 @@ const Home = () => {
                     scrollSnapType: 'x mandatory'
                 }}>
                     {[1, 2, 3].map((i) => (
-                        <div key={i} style={{
+                        <div key={i} className="card" style={{
                             minWidth: '160px',
                             height: '160px',
                             flex: '0 0 auto',
                             scrollSnapAlign: 'start',
-                            backgroundColor: 'rgba(100, 255, 218, 0.05)',
-                            borderRadius: '16px',
                             display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
-                            padding: '15px',
-                            border: '1px solid rgba(100, 255, 218, 0.1)',
+                            padding: '1.5rem',
+                            margin: 0,
                             position: 'relative',
                             overflow: 'hidden'
                         }}>
@@ -105,16 +103,15 @@ const Home = () => {
                             href={item.url}
                             target="_blank"
                             rel="noopener noreferrer"
+                            className="card"
                             style={{
-                                backgroundColor: 'rgba(255,255,255,0.03)',
                                 padding: '1.2rem',
-                                borderRadius: '16px',
                                 display: 'flex', alignItems: 'center', gap: '15px',
-                                border: '1px solid rgba(255,255,255,0.05)',
                                 transition: 'transform 0.2s, background 0.2s',
                                 cursor: 'pointer',
                                 textDecoration: 'none',
-                                color: 'inherit'
+                                color: 'inherit',
+                                margin: 0
                             }}
                             onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.06)'}
                             onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.03)'}

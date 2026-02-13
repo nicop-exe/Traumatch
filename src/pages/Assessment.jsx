@@ -231,77 +231,77 @@ const Assessment = () => {
                     <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>Step {step + 1} of {questions.length}</span>
                 </div>
 
-                <h3 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--color-secondary)' }}>{user?.name || 'New Soul'}</h3>
-                <h3 style={{ fontSize: '1.5rem', marginBottom: '2rem', lineHeight: 1.3 }}>{questions[step].text}</h3>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: '800', color: 'var(--color-secondary)', marginBottom: '0.5rem' }}>{user?.name || 'New Soul'}</h3>
+                <h3 style={{ fontSize: '1.6rem', marginBottom: '2rem', lineHeight: 1.2, fontWeight: '800' }}>{questions[step].text}</h3>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    {questions[step]?.options && (
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center', marginBottom: currentQuestion.type === 'multiselect' ? '2rem' : '0' }}>
+                <div className="animate-fade-in">
+                    {currentQuestion.type === 'multiselect' ? (
+                        <div className="chip-container">
                             {questions[step].options.map((option, idx) => {
-                                const isSelected = currentQuestion.type === 'multiselect' && (answers.interests || []).includes(option.value);
+                                const isSelected = (answers.interests || []).includes(option.value);
                                 return (
                                     <button
                                         key={idx}
-                                        className="btn btn-secondary"
-                                        onClick={() => {
-                                            if (currentQuestion.type === 'multiselect') {
-                                                toggleInterest(option.value);
-                                            } else {
-                                                handleAnswer(option);
-                                            }
-                                        }}
-                                        style={{
-                                            textAlign: 'left',
-                                            justifyContent: 'flex-start',
-                                            padding: '1.2rem',
-                                            textTransform: 'none',
-                                            letterSpacing: 'normal',
-                                            width: currentQuestion.type === 'multiselect' ? 'auto' : '100%',
-                                            backgroundColor: isSelected ? 'var(--color-secondary)' : 'transparent',
-                                            color: isSelected ? 'var(--color-primary)' : 'white'
-                                        }}
+                                        className={`chip ${isSelected ? 'active' : ''}`}
+                                        onClick={() => toggleInterest(option.value)}
                                     >
-                                        {option.label || option}
+                                        {option.label}
                                     </button>
                                 );
                             })}
                         </div>
+                    ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                            {questions[step].options.map((option, idx) => (
+                                <button
+                                    key={idx}
+                                    className="btn btn-secondary"
+                                    onClick={() => handleAnswer(option)}
+                                    style={{ textAlign: 'left', justifyContent: 'flex-start', padding: '1.2rem' }}
+                                >
+                                    {option.label}
+                                </button>
+                            ))}
+                        </div>
                     )}
 
-                    {currentQuestion.type === 'multiselect' && (
+                    <div style={{ marginTop: '2.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        {currentQuestion.type === 'multiselect' && (
+                            <button
+                                className="btn btn-primary"
+                                onClick={() => setStep(step + 1)}
+                                disabled={(answers.interests || []).length === 0}
+                            >
+                                Continuar →
+                            </button>
+                        )}
+
                         <button
-                            className="btn btn-primary"
-                            onClick={() => setStep(step + 1)}
-                            disabled={(answers.interests || []).length === 0}
+                            onClick={() => navigate('/')}
+                            style={{
+                                background: 'transparent',
+                                border: 'none',
+                                color: 'var(--color-text-muted)',
+                                fontSize: '0.85rem',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '8px',
+                                opacity: 0.7
+                            }}
                         >
-                            Continuar →
+                            <SkipForward size={14} /> Saltar por ahora
                         </button>
-                    )}
-                </div>
-
-                <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <button
-                        onClick={() => navigate('/')}
-                        style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--color-text-muted)', fontSize: '0.9rem' }}
-                    >
-                        <SkipForward size={16} /> Skip for now
-                    </button>
+                    </div>
                 </div>
             </div>
 
             {/* Legal Disclaimer */}
-            <div style={{
-                marginTop: '3rem',
-                padding: '1.5rem',
-                backgroundColor: 'rgba(100, 255, 218, 0.05)',
-                borderRadius: '12px',
-                border: '1px solid rgba(100, 255, 218, 0.1)',
-                display: 'flex',
-                gap: '12px'
-            }}>
-                <ShieldCheck size={40} color="var(--color-accent)" style={{ flexShrink: 0 }} />
-                <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', lineHeight: 1.4 }}>
-                    <strong style={{ color: 'var(--color-accent)' }}>Privacy Commitment:</strong> All information you provide is protected on our secure servers. This data will <strong style={{ color: 'white' }}>never</strong> be used for any purpose other than finding deep connections with others or personalizing your music and content feed based on your mood.
+            <div className="card" style={{ marginTop: '2rem', display: 'flex', gap: '1rem', background: 'rgba(100, 255, 218, 0.03)' }}>
+                <ShieldCheck size={32} color="var(--color-accent)" style={{ flexShrink: 0 }} />
+                <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', lineHeight: 1.5 }}>
+                    <strong style={{ color: 'var(--color-accent)' }}>Compromiso de Privacidad:</strong> Tus datos están protegidos en el santuario. Solo los usamos para encontrar resonancias profundas.
                 </p>
             </div>
         </div>

@@ -185,80 +185,88 @@ const Profile = () => {
                         <Camera size={18} />
                     </button>
                 </div>
-                <div style={{ width: '100%', maxWidth: '300px', textAlign: 'center' }}>
-                    <label style={{ display: 'block', marginBottom: '0.2rem', color: 'var(--color-text-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Identidad del Alma</label>
-                    <div style={{
-                        fontSize: '1.4rem',
-                        fontWeight: '800',
-                        color: needsAssessment ? 'var(--color-text-muted)' : 'var(--color-secondary)',
-                        marginBottom: '0.5rem',
-                        textShadow: needsAssessment ? 'none' : '0 0 10px rgba(255,215,0,0.3)',
-                        opacity: needsAssessment ? 0.5 : 1
-                    }}>
-                        {user?.behavioralProfile?.archetype_name || "Espíritu sin Clasificar"}
-                    </div>
-
-                    {needsAssessment ? (
-                        <button
-                            onClick={() => navigate('/assessment')}
-                            className="btn btn-primary"
-                            style={{
-                                padding: '10px 20px',
-                                fontSize: '0.8rem',
-                                marginBottom: '1rem',
-                                width: '100%',
-                                boxShadow: '0 0 15px rgba(100, 255, 218, 0.2)'
-                            }}
-                        >
-                            Completar Soul Assessment ⚛️
-                        </button>
-                    ) : (
-                        <button
-                            onClick={() => navigate('/assessment')}
-                            style={{
-                                fontSize: '0.7rem',
-                                color: 'var(--color-accent)',
-                                textDecoration: 'underline',
-                                background: 'none',
-                                border: 'none',
-                                padding: 0,
-                                marginBottom: '1rem',
-                                cursor: 'pointer',
-                                opacity: 0.7
-                            }}
-                        >
-                            Repetir Assessment →
-                        </button>
-                    )}
-                    <input
-                        type="text"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        placeholder="Tu nombre..."
-                        style={{ fontSize: '1rem', textAlign: 'center', fontWeight: 'bold', background: 'transparent', border: 'none', borderBottom: '1px solid rgba(255,215,0,0.2)' }}
-                    />
+            </div>
+            {/* Arquetipo e Identidad */}
+            <div className="card animate-fade-in" style={{ textAlign: 'center' }}>
+                <label style={{ display: 'block', marginBottom: '0.8rem', color: 'var(--color-text-muted)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 'bold' }}>Identidad del Alma</label>
+                <div style={{
+                    fontSize: '1.8rem',
+                    fontWeight: '800',
+                    color: needsAssessment ? 'var(--color-text-muted)' : 'var(--color-secondary)',
+                    marginBottom: '1rem',
+                    textShadow: needsAssessment ? 'none' : '0 0 15px rgba(255,215,0,0.3)',
+                    opacity: needsAssessment ? 0.6 : 1
+                }}>
+                    {user?.behavioralProfile?.archetype_name || "Espíritu sin Clasificar"}
                 </div>
+
+                {needsAssessment ? (
+                    <button
+                        onClick={() => navigate('/assessment')}
+                        className="btn btn-primary"
+                        style={{ marginBottom: '1.5rem' }}
+                    >
+                        Completar Soul Assessment ⚛️
+                    </button>
+                ) : (
+                    <button
+                        onClick={() => navigate('/assessment')}
+                        style={{
+                            fontSize: '0.8rem',
+                            color: 'var(--color-accent)',
+                            textDecoration: 'underline',
+                            background: 'none',
+                            border: 'none',
+                            padding: '0 0 1.5rem 0',
+                            cursor: 'pointer',
+                            opacity: 0.8
+                        }}
+                    >
+                        Repetir Assessment →
+                    </button>
+                )}
+
+                <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Tu nombre..."
+                    style={{
+                        fontSize: '1.2rem',
+                        textAlign: 'center',
+                        fontWeight: '800',
+                        background: 'rgba(255,255,255,0.03)',
+                        border: '1px solid var(--glass-border)',
+                        color: 'white'
+                    }}
+                />
             </div>
 
-            {/* Psychological Statistics */}
+            {/* Estadísticas Psicológicas */}
             {user?.behavioralProfile && (
-                <div style={{
-                    display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px',
-                    marginBottom: '2rem', padding: '1rem',
-                    background: 'rgba(255,255,255,0.02)', borderRadius: '16px',
-                    border: '1px solid rgba(255,255,255,0.05)'
-                }}>
-                    {Object.entries(user.behavioralProfile.calculated_indexes).map(([key, val]) => (
-                        <div key={key} style={{ textAlign: 'center' }}>
-                            <div style={{ fontSize: '0.6rem', opacity: 0.5, textTransform: 'uppercase' }}>
-                                {key.replace(/_index/g, '').replace(/_/g, ' ')}
+                <div className="card" style={{ padding: '1.5rem' }}>
+                    <label style={{ display: 'block', marginBottom: '1.5rem', color: 'var(--color-text-muted)', fontSize: '0.75rem', textTransform: 'uppercase', textAlign: 'center', letterSpacing: '1px' }}>Frecuencias del Ser</label>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                        {Object.entries(user.behavioralProfile.calculated_indexes).map(([key, val]) => (
+                            <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <span style={{ fontSize: '0.65rem', opacity: 0.6, textTransform: 'uppercase', fontWeight: '600' }}>
+                                        {key.replace(/_index/g, '').replace(/_/g, ' ')}
+                                    </span>
+                                    <span style={{ fontSize: '0.8rem', fontWeight: '800', color: 'var(--color-accent)' }}>{val}%</span>
+                                </div>
+                                <div style={{ width: '100%', height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden' }}>
+                                    <div style={{
+                                        width: `${val}%`,
+                                        height: '100%',
+                                        background: 'linear-gradient(90deg, var(--color-accent), #4fd1c5)',
+                                        borderRadius: '10px',
+                                        boxShadow: '0 0 10px rgba(100, 255, 218, 0.3)'
+                                    }}></div>
+                                </div>
                             </div>
-                            <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--color-accent)' }}>{val}%</div>
-                            <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px', marginTop: '4px' }}>
-                                <div style={{ width: `${val}%`, height: '100%', background: 'var(--color-accent)', borderRadius: '2px' }}></div>
-                            </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
             )}
 
@@ -272,71 +280,59 @@ const Profile = () => {
                 />
             </div>
 
-            {/* Predefined Emotional Aspects Selection */}
-            <div style={{ marginBottom: '2rem' }}>
-                <label style={{ display: 'block', marginBottom: '1rem', color: 'var(--color-text-muted)', textAlign: 'center' }}>Aspectos Emocionales</label>
+            {/* Aspectos Emocionales */}
+            <div className="card">
+                <label style={{ display: 'block', marginBottom: '1.2rem', color: 'var(--color-text-muted)', textAlign: 'center', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Aspectos Emocionales</label>
 
                 <div style={{
                     display: 'flex',
                     padding: '4px',
                     backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                    borderRadius: '14px',
+                    borderRadius: '16px',
                     marginBottom: '1.5rem',
-                    border: '1px solid rgba(255, 255, 255, 0.05)',
-                    position: 'relative'
+                    border: '1px solid var(--glass-border)',
                 }}>
                     <button
                         onClick={() => setActiveTab('positive')}
                         style={{
                             flex: 1,
                             padding: '12px',
-                            borderRadius: '10px',
+                            borderRadius: '12px',
                             border: 'none',
                             color: activeTab === 'positive' ? 'var(--color-primary)' : 'var(--color-text-muted)',
                             background: activeTab === 'positive' ? 'var(--color-secondary)' : 'transparent',
-                            fontWeight: '700',
+                            fontWeight: '800',
                             fontSize: '0.9rem',
                             cursor: 'pointer',
+                            transition: 'var(--transition-smooth)'
                         }}
-                    >Positivo</button>
+                    >Luz</button>
                     <button
                         onClick={() => setActiveTab('negative')}
                         style={{
                             flex: 1,
                             padding: '12px',
-                            borderRadius: '10px',
+                            borderRadius: '12px',
                             border: 'none',
                             color: activeTab === 'negative' ? 'white' : 'var(--color-text-muted)',
-                            background: activeTab === 'negative' ? '#ff4444' : 'transparent',
-                            fontWeight: '700',
+                            background: activeTab === 'negative' ? 'hsl(0, 80%, 60%)' : 'transparent',
+                            fontWeight: '800',
                             fontSize: '0.9rem',
                             cursor: 'pointer',
+                            transition: 'var(--transition-smooth)'
                         }}
-                    >Traumas / Profundo</button>
+                    >Sombras</button>
                 </div>
 
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}>
+                <div className="chip-container">
                     {(activeTab === 'positive' ? PREDEFINED_POSITIVE : PREDEFINED_TRAUMAS).map((trait, idx) => {
                         const isSelected = (activeTab === 'positive' ? positiveTraits : negativeTraits).includes(trait);
                         return (
                             <button
                                 key={idx}
                                 onClick={() => toggleTrait(trait, activeTab)}
-                                style={{
-                                    backgroundColor: isSelected
-                                        ? (activeTab === 'positive' ? 'var(--color-secondary)' : '#ff4444')
-                                        : 'rgba(255,255,255,0.05)',
-                                    color: isSelected
-                                        ? (activeTab === 'positive' ? 'var(--color-primary)' : 'white')
-                                        : 'var(--color-text-muted)',
-                                    padding: '8px 16px',
-                                    borderRadius: '20px',
-                                    fontSize: '0.85rem',
-                                    border: isSelected ? 'none' : '1px solid rgba(255,255,255,0.1)',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s ease',
-                                    fontWeight: isSelected ? 'bold' : 'normal'
-                                }}
+                                className={`chip ${isSelected ? 'active' : ''}`}
+                                style={isSelected && activeTab === 'negative' ? { background: 'hsl(0, 80%, 60%)', color: 'white', borderColor: 'hsl(0, 80%, 60%)' } : {}}
                             >
                                 {trait}
                             </button>

@@ -99,20 +99,41 @@ const Swipe = () => {
             }
         }
 
-        // 2. Shared Traumas (The "Traumatch" legacy core)
-        const myTraumas = me.traumas || [];
-        const theirTraumas = target.traumas || [];
+        // 2. Intent-Based Psychological Engine
+        const myIntent = me.intent || 'Mirror'; // Default to Mirror resonance
+        const theirIntent = target.intent || 'Mirror';
+
+        // MIRROR: Resonance via shared weight (Shared Traumas)
+        const myTraumas = me.traumas || me.negativeTraits || [];
+        const theirTraumas = target.traumas || target.negativeTraits || [];
         const sharedTraumas = myTraumas.filter(t => theirTraumas.includes(t));
 
-        if (sharedTraumas.length > 0) {
-            score += sharedTraumas.length * 15;
-            reasons.push(`${sharedTraumas[0]} resonance`);
+        if (myIntent === 'Mirror' && theirIntent === 'Mirror') {
+            if (sharedTraumas.length > 0) {
+                score += sharedTraumas.length * 20;
+                reasons.push(`${sharedTraumas[0]} Resonance`);
+            }
+        } else if (myIntent === 'Eclipse' && theirIntent === 'Eclipse') {
+            // ECLIPSE: Seeking the opposite (Complementary Strengths)
+            const myLight = me.positiveTraits || [];
+            const theirShadow = target.negativeTraits || [];
+            const complementary = myLight.filter(l => theirShadow.includes(l));
+            if (complementary.length > 0) {
+                score += complementary.length * 15;
+                reasons.push("Karmic Balance");
+            }
+        } else {
+            // Mixed or default resonance
+            if (sharedTraumas.length > 0) {
+                score += sharedTraumas.length * 10;
+                reasons.push("Echo of the Past");
+            }
         }
 
         // 3. Shared Interests (The "Frequency")
         const sharedInterests = (me.interests || []).filter(i => (target.interests || []).includes(i));
         score += sharedInterests.length * 5;
-        if (sharedInterests.length > 3) reasons.push("High Interest Sync");
+        if (sharedInterests.length > 2) reasons.push("Frequency Sync");
 
         // 4. Normalized result
         return {
@@ -233,30 +254,30 @@ const Swipe = () => {
     }
 
     return (
-        <div className="page-container" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <h2 style={{ textAlign: 'center', color: 'var(--color-text)', marginBottom: '1rem', letterSpacing: '2px', textTransform: 'uppercase', fontSize: '0.9rem' }}>Discover Souls</h2>
+        <div className="page-container" style={{ paddingBottom: 'calc(var(--nav-height) + 1rem)' }}>
+            <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+                <h2 className="text-gradient" style={{ fontSize: '1.2rem', textTransform: 'uppercase', letterSpacing: '4px' }}>Discover Souls</h2>
+            </div>
 
-            <div style={{
+            <div className="card animate-fade-in" style={{
                 flex: 1,
-                width: '100%',
-                backgroundColor: 'var(--color-primary)',
-                borderRadius: '20px',
+                padding: 0,
                 overflow: 'hidden',
                 position: 'relative',
-                boxShadow: '0 15px 35px rgba(0,0,0,0.5)',
-                border: '1px solid rgba(255,255,255,0.05)',
-                display: 'flex', flexDirection: 'column' // Ensure content stretches
+                display: 'flex',
+                flexDirection: 'column',
+                minHeight: '400px'
             }}>
                 <img
                     src={getHighResPhoto(currentUser.avatar || currentUser.photoURL) || `https://ui-avatars.com/api/?background=0a192f&color=ffd700&name=${encodeURIComponent(currentUser.name || 'New Soul')}`}
                     alt={currentUser.name}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.9 }}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 1 }}
                 />
 
                 {/* Gradient Overlay */}
                 <div style={{
                     position: 'absolute', bottom: 0, left: 0, right: 0, top: 0,
-                    background: 'linear-gradient(to top, rgba(2,12,27,1) 0%, rgba(2,12,27,0.6) 30%, transparent 100%)',
+                    background: 'linear-gradient(to top, var(--color-background) 0%, rgba(2,12,27,0.4) 40%, transparent 100%)',
                 }}></div>
 
                 <div style={{
@@ -264,32 +285,33 @@ const Swipe = () => {
                     padding: '2rem 1.5rem',
                     color: 'white'
                 }}>
-                    <h3 style={{ fontSize: '2rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '10px', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
+                    <h3 style={{ fontSize: '2.25rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '10px', fontWeight: '800' }}>
                         {currentUser.name}{currentUser.age ? `, ${currentUser.age}` : ''}
                     </h3>
-                    <p style={{ fontSize: '1.1rem', opacity: 0.9, lineHeight: 1.4, marginBottom: '1rem' }}>
+                    <p style={{ fontSize: '1.1rem', opacity: 0.9, lineHeight: 1.4, marginBottom: '1rem', fontWeight: '400' }}>
                         {currentUser.bio ? `"${currentUser.bio}"` : "Seeking a meaningful connection..."}
                     </p>
 
                     {currentUser.location && (
-                        <div style={{ fontSize: '0.85rem', opacity: 0.8, display: 'flex', alignItems: 'center', gap: '8px', marginTop: '0.5rem' }}>
-                            <MapPin size={14} color="var(--color-accent)" />
+                        <div style={{ fontSize: '0.9rem', opacity: 0.8, display: 'flex', alignItems: 'center', gap: '8px', marginTop: '0.5rem', color: 'var(--color-accent)' }}>
+                            <MapPin size={16} />
                             {currentUser.location}
                         </div>
                     )}
                 </div>
             </div>
 
-            <div style={{ height: '100px', display: 'flex', justifyContent: 'space-evenly', alignItems: 'center', padding: '1rem 0' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', padding: '2rem 0' }}>
                 <button
                     onClick={() => handleSwipe('left')}
                     className="icon-btn"
                     style={{
-                        width: '70px', height: '70px',
+                        width: '72px', height: '72px',
                         backgroundColor: 'rgba(255, 68, 68, 0.1)',
                         border: '2px solid #ff4444',
                         color: '#ff4444',
-                        boxShadow: '0 5px 20px rgba(255, 68, 68, 0.2)'
+                        boxShadow: '0 8px 20px rgba(255, 68, 68, 0.2)',
+                        transition: 'var(--transition-smooth)'
                     }}
                 >
                     <ThumbsDown size={32} />
@@ -299,11 +321,12 @@ const Swipe = () => {
                     onClick={() => handleSwipe('right')}
                     className="icon-btn"
                     style={{
-                        width: '70px', height: '70px',
+                        width: '72px', height: '72px',
                         backgroundColor: 'rgba(100, 255, 218, 0.1)',
                         border: '2px solid var(--color-accent)',
                         color: 'var(--color-accent)',
-                        boxShadow: '0 5px 20px rgba(100, 255, 218, 0.2)'
+                        boxShadow: '0 8px 20px rgba(100, 255, 218, 0.2)',
+                        transition: 'var(--transition-smooth)'
                     }}
                 >
                     <ThumbsUp size={32} />
