@@ -23,38 +23,34 @@ const Swipe = () => {
         return url;
     };
 
-    // Fetch real users from Firestore
+    // Fetch real users from Firestore in Real-time
     React.useEffect(() => {
-        const fetchUsers = async () => {
-            if (!user) return;
-            setIsLoading(true);
-            try {
-                // In a real app, we'd filter out already swiped users here
-                const q = query(collection(db, "users"), limit(100));
-                const querySnapshot = await getDocs(q);
-                const matchedIds = matches.map(m => m.id || m.uid);
+        if (!user) return;
+        setIsLoading(true);
 
-                const users = [];
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    const isCurrentUser = doc.id === user.uid;
-                    const alreadyMatched = matchedIds.includes(doc.id);
+        const q = query(collection(db, "users"), limit(100));
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+            const matchedIds = matches.map(m => m.id || m.uid);
+            const users = [];
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                const isCurrentUser = doc.id === user.uid;
+                const alreadyMatched = matchedIds.includes(doc.id);
 
-                    if (!isCurrentUser && !alreadyMatched) {
-                        users.push({ id: doc.id, uid: doc.id, ...data });
-                    }
-                });
-                // Shuffle locally for a fresher feel
-                setPotentialMatches(users.sort(() => 0.5 - Math.random()));
-            } catch (e) {
-                console.error("Error fetching matches:", e);
-            } finally {
-                setIsLoading(false);
-            }
-        };
+                if (!isCurrentUser && !alreadyMatched) {
+                    users.push({ id: doc.id, uid: doc.id, ...data });
+                }
+            });
+            // Keep current order if we already have users, or shuffle if first load
+            setPotentialMatches(prev => prev.length > 0 ? users : users.sort(() => 0.5 - Math.random()));
+            setIsLoading(false);
+        }, (error) => {
+            console.error("Error fetching matches:", error);
+            setIsLoading(false);
+        });
 
-        fetchUsers();
-    }, [user, matches]);
+        return () => unsubscribe();
+    }, [user, matches.length]); // Re-sync if matches count changes
 
     const currentUser = currentIndex < potentialMatches.length ? potentialMatches[currentIndex] : null;
 
