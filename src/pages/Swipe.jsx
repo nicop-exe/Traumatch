@@ -4,7 +4,7 @@ import { ThumbsUp, ThumbsDown, Info, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import { db } from '../firebase';
-import { collection, query, getDocs, where, limit, doc, setDoc } from 'firebase/firestore';
+import { collection, query, onSnapshot, orderBy, limit, doc, setDoc } from 'firebase/firestore';
 import { MapPin } from 'lucide-react'; // Added MapPin
 
 const Swipe = () => {
