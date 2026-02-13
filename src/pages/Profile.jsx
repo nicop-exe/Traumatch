@@ -297,7 +297,7 @@ const Profile = () => {
                         style={{
                             flex: 1,
                             padding: '12px',
-                            borderRadius: '12px',
+                            borderRadius: '100px',
                             border: 'none',
                             color: activeTab === 'positive' ? 'var(--color-primary)' : 'var(--color-text-muted)',
                             background: activeTab === 'positive' ? 'var(--color-secondary)' : 'transparent',
@@ -312,7 +312,7 @@ const Profile = () => {
                         style={{
                             flex: 1,
                             padding: '12px',
-                            borderRadius: '12px',
+                            borderRadius: '100px',
                             border: 'none',
                             color: activeTab === 'negative' ? 'white' : 'var(--color-text-muted)',
                             background: activeTab === 'negative' ? 'hsl(0, 80%, 60%)' : 'transparent',

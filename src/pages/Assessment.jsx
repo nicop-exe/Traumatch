@@ -223,8 +223,8 @@ const Assessment = () => {
     };
 
     return (
-        <div className="page-container" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '100%' }}>
-            <div className="animate-fade-in" style={{ backgroundColor: 'rgba(255,255,255,0.03)', padding: '2rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
+        <div className="page-container" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '100%', padding: '2rem' }}>
+            <div className="animate-fade-in card" style={{ padding: '2.5rem', marginBottom: 0 }}>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                     <h2 style={{ color: 'var(--color-secondary)', fontSize: '1.2rem' }}>Soul Discovery</h2>

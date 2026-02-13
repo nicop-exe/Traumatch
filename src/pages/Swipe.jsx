@@ -307,11 +307,10 @@ const Swipe = () => {
                     className="icon-btn"
                     style={{
                         width: '72px', height: '72px',
-                        backgroundColor: 'rgba(255, 68, 68, 0.1)',
+                        backgroundColor: 'rgba(255, 68, 68, 0.15)',
                         border: '2px solid #ff4444',
                         color: '#ff4444',
-                        boxShadow: '0 8px 20px rgba(255, 68, 68, 0.2)',
-                        transition: 'var(--transition-smooth)'
+                        boxShadow: 'none'
                     }}
                 >
                     <ThumbsDown size={32} />
@@ -322,11 +321,10 @@ const Swipe = () => {
                     className="icon-btn"
                     style={{
                         width: '72px', height: '72px',
-                        backgroundColor: 'rgba(100, 255, 218, 0.1)',
-                        border: '2px solid var(--color-accent)',
-                        color: 'var(--color-accent)',
-                        boxShadow: '0 8px 20px rgba(100, 255, 218, 0.2)',
-                        transition: 'var(--transition-smooth)'
+                        backgroundColor: 'rgba(0, 255, 200, 0.15)',
+                        border: '2px solid var(--color-secondary)',
+                        color: 'var(--color-secondary)',
+                        boxShadow: 'none'
                     }}
                 >
                     <ThumbsUp size={32} />

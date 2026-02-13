@@ -468,7 +468,7 @@ const Chat = () => {
                     onChange={(e) => setInputText(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                     placeholder="Escribe una resonancia..."
-                    style={{ flex: 1, margin: 0, borderRadius: '100px', padding: '0.9rem 1.5rem', border: '1px solid var(--glass-border)' }}
+                    style={{ flex: 1, margin: 0, padding: '0.9rem 1.5rem', border: '1px solid var(--glass-border)' }}
                 />
                 <button
                     onClick={handleSendMessage}
@@ -477,7 +477,7 @@ const Chat = () => {
                         width: '52px', height: '52px',
                         color: 'var(--color-primary)',
                         background: 'var(--color-secondary)',
-                        boxShadow: '0 4px 15px var(--color-secondary-soft)'
+                        boxShadow: 'none'
                     }}
                 >
                     <Send size={22} />

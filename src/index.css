@@ -160,8 +160,8 @@ h2 {
   font-size: 0.7rem;
   font-weight: 600;
   transition: var(--transition-smooth);
-  padding: 8px;
-  border-radius: 12px;
+  padding: 8px 12px;
+  border-radius: 20px;
 }
 
 .nav-item.active {
@@ -179,15 +179,36 @@ h2 {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 1rem 1.5rem;
-  border-radius: 16px;
+  padding: 1rem 2rem;
+  border-radius: 100px;
   font-weight: 700;
   font-size: 1rem;
   transition: var(--transition-smooth);
   border: none;
   cursor: pointer;
   width: 100%;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: var(--glass-bg);
+  color: white;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  backdrop-filter: blur(10px);
+  padding: 0;
+}
+
+.icon-btn:hover {
+  background: var(--glass-border);
+  transform: scale(1.05);
 }
 
 .btn-primary {
@@ -227,8 +248,8 @@ textarea {
   width: 100%;
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
-  padding: 1.1rem;
-  border-radius: 16px;
+  padding: 1rem 1.4rem;
+  border-radius: 100px;
   color: var(--color-text);
   font-family: var(--font-family);
   font-size: 1rem;
@@ -248,9 +269,9 @@ textarea:focus {
 .card {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(10px);
-  border-radius: 24px;
+  border-radius: 32px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
   box-shadow: var(--glass-shadow);
