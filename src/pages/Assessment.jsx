@@ -139,14 +139,36 @@ const Assessment = () => {
     // Core Onboarding + Randomized Subset
     const questions = React.useMemo(() => {
         const mandatory = [
-            { id: 'intent', type: 'intent', text: "What kind of soul-connection are you seeking today?" },
-            { id: 'interests', type: 'multiselect', text: "Which frequencies do you tune into? (Pick your interests)", options: INTERESTS }
+            {
+                id: 'intent',
+                type: 'single',
+                text: "¿Qué tipo de conexión buscas hoy?",
+                options: [
+                    { label: "Mi Espejo (Almas similares)", value: 'match', trait: 'Mirror' },
+                    { label: "Mi Eclipse (Almas que me complementan)", value: 'complement', trait: 'Eclipse' }
+                ]
+            },
+            {
+                id: 'interests',
+                type: 'multiselect',
+                text: "¿Qué frecuencias sintonizas? (Intereses)",
+                options: INTERESTS.map(i => ({ label: i, value: i }))
+            }
         ];
         const shuffledPool = [...QUESTION_POOL].sort(() => 0.5 - Math.random());
         return [...mandatory, ...shuffledPool.slice(0, 4)]; // 2 fixed + 4 random
     }, []);
 
     const currentQuestion = questions[step];
+
+    const toggleInterest = (val) => {
+        const currentInterests = answers.interests || [];
+        if (currentInterests.includes(val)) {
+            setAnswers({ ...answers, interests: currentInterests.filter(i => i !== val) });
+        } else {
+            setAnswers({ ...answers, interests: [...currentInterests, val] });
+        }
+    };
 
     const handleAnswer = (value) => {
         const newAnswers = { ...answers, [currentQuestion.id]: value };
@@ -179,7 +201,7 @@ const Assessment = () => {
             avatar: user?.avatar || "",
             positive: [...new Set([...(user?.positive || []), ...selectedPositive, ...dimensionTraits])],
             behavioralProfile,
-            intent: finalAnswers?.intent || "",
+            intent: (finalAnswers?.intent?.value) || (finalAnswers?.intent) || "",
             interests: finalAnswers?.interests || [],
             assessmentCompleted: true,
             updatedAt: serverTimestamp()
@@ -213,16 +235,48 @@ const Assessment = () => {
                 <h3 style={{ fontSize: '1.5rem', marginBottom: '2rem', lineHeight: 1.3 }}>{questions[step].text}</h3>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    {questions[step].options.map((option, idx) => (
+                    {questions[step]?.options && (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center', marginBottom: currentQuestion.type === 'multiselect' ? '2rem' : '0' }}>
+                            {questions[step].options.map((option, idx) => {
+                                const isSelected = currentQuestion.type === 'multiselect' && (answers.interests || []).includes(option.value);
+                                return (
+                                    <button
+                                        key={idx}
+                                        className="btn btn-secondary"
+                                        onClick={() => {
+                                            if (currentQuestion.type === 'multiselect') {
+                                                toggleInterest(option.value);
+                                            } else {
+                                                handleAnswer(option);
+                                            }
+                                        }}
+                                        style={{
+                                            textAlign: 'left',
+                                            justifyContent: 'flex-start',
+                                            padding: '1.2rem',
+                                            textTransform: 'none',
+                                            letterSpacing: 'normal',
+                                            width: currentQuestion.type === 'multiselect' ? 'auto' : '100%',
+                                            backgroundColor: isSelected ? 'var(--color-secondary)' : 'transparent',
+                                            color: isSelected ? 'var(--color-primary)' : 'white'
+                                        }}
+                                    >
+                                        {option.label || option}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    )}
+
+                    {currentQuestion.type === 'multiselect' && (
                         <button
-                            key={idx}
-                            className="btn btn-secondary"
-                            onClick={() => handleAnswer(option)}
-                            style={{ textAlign: 'left', justifyContent: 'flex-start', padding: '1.2rem', textTransform: 'none', letterSpacing: 'normal' }}
+                            className="btn btn-primary"
+                            onClick={() => setStep(step + 1)}
+                            disabled={(answers.interests || []).length === 0}
                         >
-                            {option.label}
+                            Continuar →
                         </button>
-                    ))}
+                    )}
                 </div>
 
                 <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
