@@ -1,4 +1,5 @@
 import React, { useContext, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../App';
 import { auth, db } from '../firebase';
 import { doc, setDoc } from 'firebase/firestore';
@@ -8,6 +9,7 @@ const Profile = () => {
     const { user, setUser } = useContext(AppContext);
     const [isSaving, setIsSaving] = useState(false);
     const fileInputRef = useRef(null);
+    const navigate = useNavigate();
 
     // State
     const [name, setName] = useState(user?.name || "");
@@ -32,21 +34,22 @@ const Profile = () => {
         }
     }, [user]);
 
-    const handleAddTrait = () => {
-        if (!newTrait.trim()) return;
-        if (activeTab === 'positive') {
-            setPositiveTraits([...positiveTraits, newTrait.trim()]);
-        } else {
-            setNegativeTraits([...negativeTraits, newTrait.trim()]);
-        }
-        setNewTrait("");
-    };
+    const PREDEFINED_POSITIVE = ["Empático", "Resiliente", "Tranquilo", "Optimista", "Creativo", "Disciplinado", "Curioso", "Aventurero", "Sincero", "Leal", "Compasivo", "Valiente"];
+    const PREDEFINED_TRAUMAS = ["Abandono", "Ansiedad", "Inseguridad", "Perfeccionismo", "Evitación", "Melancolía", "Soledad", "Trauma Familiar", "Miedo al rechazo", "Duelo", "Inestabilidad"];
 
-    const removeTrait = (trait, type) => {
+    const toggleTrait = (trait, type) => {
         if (type === 'positive') {
-            setPositiveTraits(positiveTraits.filter(t => t !== trait));
+            if (positiveTraits.includes(trait)) {
+                setPositiveTraits(positiveTraits.filter(t => t !== trait));
+            } else {
+                setPositiveTraits([...positiveTraits, trait]);
+            }
         } else {
-            setNegativeTraits(negativeTraits.filter(t => t !== trait));
+            if (negativeTraits.includes(trait)) {
+                setNegativeTraits(negativeTraits.filter(t => t !== trait));
+            } else {
+                setNegativeTraits([...negativeTraits, trait]);
+            }
         }
     };
 
@@ -63,19 +66,19 @@ const Profile = () => {
                 location: location || ""
             };
             try {
+                const { db } = await import('../firebase');
+                const { doc, setDoc } = await import('firebase/firestore');
                 if (user?.uid) {
                     await setDoc(doc(db, "users", user.uid), profileUpdate, { merge: true });
                 }
                 setUser({ ...user, ...profileUpdate });
-                alert("✨ Profile & Emotional Data synced with the sanctuary!");
+                alert("✨ Perfil sincronizado con el santuario!");
             } catch (e) {
                 console.error("Error saving profile:", e);
-                alert(`The void rejected your changes: ${e.message}. Please check your connection.`);
+                alert(`Error: ${e.message}`);
             } finally {
                 setIsSaving(false);
             }
-        } else {
-            alert("Error: No soul detected. Please log in.");
         }
     };
 
@@ -150,6 +153,8 @@ const Profile = () => {
 
     if (!user) return <div style={{ padding: '2rem', textAlign: 'center' }}>Please log in.</div>;
 
+    const needsAssessment = !user?.behavioralProfile;
+
     return (
         <div className="page-container">
             <h2 style={{ color: 'var(--color-secondary)', textAlign: 'center', marginBottom: '2rem' }}>Edit Profile</h2>
@@ -181,21 +186,30 @@ const Profile = () => {
                     </button>
                 </div>
                 <div style={{ width: '100%', maxWidth: '300px', textAlign: 'center' }}>
-                    <label style={{ display: 'block', marginBottom: '0.2rem', color: 'var(--color-text-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Soul Identity</label>
+                    <label style={{ display: 'block', marginBottom: '0.2rem', color: 'var(--color-text-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Identidad del Alma</label>
                     <div style={{
                         fontSize: '1.4rem',
                         fontWeight: '800',
-                        color: 'var(--color-secondary)',
+                        color: needsAssessment ? 'var(--color-text-muted)' : 'var(--color-secondary)',
                         marginBottom: '0.5rem',
-                        textShadow: '0 0 10px rgba(255,215,0,0.3)'
+                        textShadow: needsAssessment ? 'none' : '0 0 10px rgba(255,215,0,0.3)',
+                        opacity: needsAssessment ? 0.5 : 1
                     }}>
-                        {user?.behavioralProfile?.archetype_name || "New Soul"}
+                        {user?.behavioralProfile?.archetype_name || "Sin Clasificar"}
                     </div>
+                    {needsAssessment && (
+                        <button
+                            onClick={() => navigate('/assessment')}
+                            style={{ fontSize: '0.7rem', color: 'var(--color-accent)', textDecoration: 'underline', background: 'none', border: 'none', padding: 0, marginBottom: '0.5rem', cursor: 'pointer' }}
+                        >
+                            Completar Soul Assessment →
+                        </button>
+                    )}
                     <input
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        placeholder="Your name..."
+                        placeholder="Tu nombre..."
                         style={{ fontSize: '1rem', textAlign: 'center', fontWeight: 'bold', background: 'transparent', border: 'none', borderBottom: '1px solid rgba(255,215,0,0.2)' }}
                     />
                 </div>
@@ -224,7 +238,7 @@ const Profile = () => {
             )}
 
             <div style={{ marginBottom: '1.5rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>Bio</label>
+                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>Biografía</label>
                 <textarea
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
@@ -233,9 +247,9 @@ const Profile = () => {
                 />
             </div>
 
-            {/* Emotional Aspects Section */}
+            {/* Predefined Emotional Aspects Selection */}
             <div style={{ marginBottom: '2rem' }}>
-                <label style={{ display: 'block', marginBottom: '1rem', color: 'var(--color-text-muted)', textAlign: 'center' }}>Emotional Aspects</label>
+                <label style={{ display: 'block', marginBottom: '1rem', color: 'var(--color-text-muted)', textAlign: 'center' }}>Aspectos Emocionales</label>
 
                 <div style={{
                     display: 'flex',
@@ -258,10 +272,8 @@ const Profile = () => {
                             fontWeight: '700',
                             fontSize: '0.9rem',
                             cursor: 'pointer',
-                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                            zIndex: 1
                         }}
-                    >Positive</button>
+                    >Positivo</button>
                     <button
                         onClick={() => setActiveTab('negative')}
                         style={{
@@ -274,41 +286,37 @@ const Profile = () => {
                             fontWeight: '700',
                             fontSize: '0.9rem',
                             cursor: 'pointer',
-                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                            zIndex: 1
                         }}
-                    >Traumas / Deep</button>
+                    >Traumas / Profundo</button>
                 </div>
 
-                <div style={{ display: 'flex', gap: '10px', marginBottom: '1rem' }}>
-                    <input
-                        type="text"
-                        value={newTrait}
-                        onChange={(e) => setNewTrait(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleAddTrait()}
-                        placeholder={`Add ${activeTab} trait...`}
-                        style={{ margin: 0 }}
-                    />
-                    <button onClick={handleAddTrait} className="btn" style={{ padding: '0 20px', minWidth: '50px' }}>+</button>
-                </div>
-
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                    {(activeTab === 'positive' ? positiveTraits : negativeTraits).map((trait, idx) => (
-                        <span key={idx} style={{
-                            backgroundColor: activeTab === 'positive' ? 'rgba(255,215,0,0.15)' : 'rgba(255,68,68,0.15)',
-                            color: activeTab === 'positive' ? 'var(--color-secondary)' : '#ff4444',
-                            padding: '6px 12px', borderRadius: '20px', fontSize: '0.9rem',
-                            display: 'flex', alignItems: 'center', gap: '8px', border: '1px solid currentColor'
-                        }}>
-                            {trait}
-                            <button onClick={() => removeTrait(trait, activeTab)} className="icon-btn" style={{ padding: 0, color: 'inherit' }}>×</button>
-                        </span>
-                    ))}
-                    {(activeTab === 'positive' ? positiveTraits : negativeTraits).length === 0 && (
-                        <span style={{ color: 'var(--color-text-muted)', fontStyle: 'italic', fontSize: '0.8rem', width: '100%', textAlign: 'center' }}>
-                            No traits added yet. Add some to improve matching!
-                        </span>
-                    )}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}>
+                    {(activeTab === 'positive' ? PREDEFINED_POSITIVE : PREDEFINED_TRAUMAS).map((trait, idx) => {
+                        const isSelected = (activeTab === 'positive' ? positiveTraits : negativeTraits).includes(trait);
+                        return (
+                            <button
+                                key={idx}
+                                onClick={() => toggleTrait(trait, activeTab)}
+                                style={{
+                                    backgroundColor: isSelected
+                                        ? (activeTab === 'positive' ? 'var(--color-secondary)' : '#ff4444')
+                                        : 'rgba(255,255,255,0.05)',
+                                    color: isSelected
+                                        ? (activeTab === 'positive' ? 'var(--color-primary)' : 'white')
+                                        : 'var(--color-text-muted)',
+                                    padding: '8px 16px',
+                                    borderRadius: '20px',
+                                    fontSize: '0.85rem',
+                                    border: isSelected ? 'none' : '1px solid rgba(255,255,255,0.1)',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease',
+                                    fontWeight: isSelected ? 'bold' : 'normal'
+                                }}
+                            >
+                                {trait}
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
 
