@@ -28,10 +28,14 @@ const Swipe = () => {
         if (!user) return;
         setIsLoading(true);
 
-        const q = query(collection(db, "users"), orderBy("createdAt", "desc"), limit(100));
+        // Remove orderBy for maximum discovery (some users might lack createdAt field)
+        const q = query(collection(db, "users"), limit(100));
+
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
+            console.log(`FEtching from void: Found ${querySnapshot.size} total souls.`);
             const matchedIds = matches.map(m => m.id || m.uid);
             const users = [];
+
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
                 const isCurrentUser = doc.id === user.uid;
@@ -41,16 +45,23 @@ const Swipe = () => {
                     users.push({ id: doc.id, uid: doc.id, ...data });
                 }
             });
-            // Keep current order if we already have users, or shuffle if first load
-            setPotentialMatches(prev => prev.length > 0 ? users : users.sort(() => 0.5 - Math.random()));
+
+            console.log(`Filtered: ${users.length} souls remaining for discovery.`);
+
+            // Shuffling only on first load to prevent jumping
+            setPotentialMatches(prev => {
+                if (prev.length > 0) return users;
+                return users.sort(() => 0.5 - Math.random());
+            });
             setIsLoading(false);
         }, (error) => {
-            console.error("Error fetching matches:", error);
+            console.error("Critical Void Error:", error);
+            alert("The void is temporarily unstable. Attempting to reconnect...");
             setIsLoading(false);
         });
 
         return () => unsubscribe();
-    }, [user, matches.length]); // Re-sync if matches count changes
+    }, [user?.uid, matches.length]); // Re-sync if matches count changes
 
     const currentUser = currentIndex < potentialMatches.length ? potentialMatches[currentIndex] : null;
 
@@ -164,10 +175,39 @@ const Swipe = () => {
         );
     }
 
+    const createDemoSoul = async () => {
+        try {
+            const demoId = `demo_${Math.floor(Math.random() * 10000)}`;
+            const demoSoul = {
+                name: "Soul Gemela",
+                bio: "Soy un alma errante buscando resonancia en el vacío.",
+                avatar: `https://ui-avatars.com/api/?background=random&color=fff&name=Soul+Gemela`,
+                traumas: user?.traumas || ["Soledad"],
+                positive: ["Empático", "Creativo"],
+                interests: user?.interests || ["Music"],
+                createdAt: new Date().toISOString(),
+                behavioralProfile: {
+                    archetype_name: "The Dreamer Explorer",
+                    calculated_indexes: {
+                        self_awareness_index: 80,
+                        security_vincular_index: 70,
+                        reactivity_index: 30,
+                        emotional_regulation_index: 85
+                    }
+                }
+            };
+            await setDoc(doc(db, "users", demoId), demoSoul);
+            alert("✨ ¡Un alma gemela ha entrado al santuario!");
+        } catch (e) {
+            console.error(e);
+            alert("Error invocando alma: " + e.message);
+        }
+    };
+
     if (isLoading) {
         return (
             <div className="page-container" style={{ textAlign: 'center', justifyContent: 'center' }}>
-                <div className="animate-pulse" style={{ color: 'var(--color-secondary)' }}>Searching the void for matches...</div>
+                <div className="animate-pulse" style={{ color: 'var(--color-secondary)' }}>Buscando almas en el vacío...</div>
             </div>
         );
     }
@@ -178,9 +218,16 @@ const Swipe = () => {
                 <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
                     <AlertCircle size={40} color="var(--color-text-muted)" />
                 </div>
-                <h2>The void is quiet.</h2>
-                <p style={{ color: 'var(--color-text-muted)', marginBottom: '2rem' }}>Check back as more souls enter the sanctuary.</p>
-                <button className="btn btn-secondary" onClick={() => setCurrentIndex(0)}>Search Again</button>
+                <h2>El vacío está en silencio.</h2>
+                <p style={{ color: 'var(--color-text-muted)', marginBottom: '1rem' }}>
+                    Has resonado con todas las almas disponibles o estás solo en el santuario.
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <button className="btn" onClick={() => setCurrentIndex(0)}>Volver a Buscar</button>
+                    <button className="btn btn-secondary" onClick={createDemoSoul} style={{ fontSize: '0.8rem', opacity: 0.8 }}>
+                        ✨ Invocar Alma de Prueba
+                    </button>
+                </div>
             </div>
         );
     }
