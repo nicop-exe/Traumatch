@@ -435,13 +435,8 @@ const Chat = () => {
 
             {/* Input area */}
             <div style={{
-                padding: '0.8rem 1rem',
-                display: 'flex',
-                gap: '12px',
-                alignItems: 'center',
-                background: 'rgba(10, 25, 47, 0.95)',
-                backdropFilter: 'blur(25px)',
-                paddingBottom: 'calc(var(--nav-height) + 15px)',
+                paddingBottom: 'calc(var(--nav-height) + var(--safe-bottom) + 15px)',
+                paddingTop: '15px',
                 boxShadow: '0 -10px 40px rgba(0,0,0,0.5)',
                 position: 'relative',
                 zIndex: 100

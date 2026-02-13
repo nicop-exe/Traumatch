@@ -133,18 +133,16 @@ h2 {
 }
 
 /* Premium Navigation Bar */
-.main-nav {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background: rgba(10, 25, 47, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid var(--glass-border);
-  z-index: 1000;
-  padding-top: 15px;
-  padding-bottom: calc(var(--safe-bottom) + 15px);
+position: absolute;
+bottom: 0;
+left: 0;
+width: 100%;
+background: rgba(10, 25, 47, 0.85);
+backdrop-filter: blur(20px);
+-webkit-backdrop-filter: blur(20px);
+border-top: 1px solid var(--glass-border);
+z-index: 1000;
+padding-bottom: var(--safe-bottom);
 }
 
 .nav-content {
