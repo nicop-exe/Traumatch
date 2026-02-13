@@ -54,39 +54,59 @@ const Swipe = () => {
 
     const currentUser = currentIndex < potentialMatches.length ? potentialMatches[currentIndex] : null;
 
-    // Advanced Algorithm: Soul Bond Strength
+    // Advanced Algorithm: Soul Bond Strength (Refined with Behavioral Engine)
     const calculateMatchScore = (me, target) => {
         if (!me || !target) return { score: 0, reasons: [] };
 
-        let score = 20; // Base score (chemistry)
+        let score = 25; // Base chemistry
         let reasons = [];
 
-        // 1. Shared Traumas (The "Traumatch" core)
+        // 1. Behavioral Compatibility (The Brain)
+        const myProfile = me.behavioralProfile;
+        const theirProfile = target.behavioralProfile;
+
+        if (myProfile && theirProfile) {
+            // Attachment Style Compatibility
+            const myAttach = myProfile.calculated_indexes?.security_vincular_index || 50;
+            const theirAttach = theirProfile.calculated_indexes?.security_vincular_index || 50;
+
+            // Higher security index on both sides = healthier match
+            const securityAvg = (myAttach + theirAttach) / 2;
+            score += (securityAvg / 10) * 5; // Up to 50 points boost for dual security
+
+            if (myProfile.archetype_name === theirProfile.archetype_name) {
+                score += 15;
+                reasons.push(`Same Archetype: ${myProfile.archetype_name}`);
+            }
+
+            // Regulation matching (Reactive + Regulator = Complementary)
+            const myReact = myProfile.calculated_indexes?.reactivity_index || 50;
+            const theirReg = theirProfile.calculated_indexes?.emotional_regulation_index || 50;
+            if (myReact > 70 && theirReg > 70) {
+                score += 15;
+                reasons.push("Complementary Regulation");
+            }
+        }
+
+        // 2. Shared Traumas (The "Traumatch" legacy core)
         const myTraumas = me.traumas || [];
         const theirTraumas = target.traumas || [];
         const sharedTraumas = myTraumas.filter(t => theirTraumas.includes(t));
 
-        if (me.intent === 'match') {
-            // Looking for someone similar
-            score += sharedTraumas.length * 20;
-            if (sharedTraumas.length > 0) reasons.push(`Shared: ${sharedTraumas[0]}`);
-        } else if (me.intent === 'complement') {
-            // Looking for balance
-            const sharedPositive = (me.positive || []).filter(p => (target.positive || []).includes(p));
-            score += sharedPositive.length * 15;
-            if (sharedTraumas.length === 0) score += 10; // Bonus for not sharing same heavy baggage
-            if (sharedPositive.length > 0) reasons.push(`Synchronized: ${sharedPositive[0]}`);
+        if (sharedTraumas.length > 0) {
+            score += sharedTraumas.length * 15;
+            reasons.push(`${sharedTraumas[0]} resonance`);
         }
 
-        // 2. Shared Interests
+        // 3. Shared Interests (The "Frequency")
         const sharedInterests = (me.interests || []).filter(i => (target.interests || []).includes(i));
-        score += sharedInterests.length * 10;
-        if (sharedInterests.length > 0) reasons.push(`In Tune: ${sharedInterests[0]}`);
+        score += sharedInterests.length * 5;
+        if (sharedInterests.length > 3) reasons.push("High Interest Sync");
 
-        // 3. Normalized result (max approx 100)
+        // 4. Normalized result
         return {
             score: Math.min(Math.round(score), 99),
-            reasons
+            reasons: [...new Set(reasons)]
         };
     };
 

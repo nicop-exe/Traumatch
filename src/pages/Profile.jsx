@@ -180,17 +180,48 @@ const Profile = () => {
                         <Camera size={18} />
                     </button>
                 </div>
-                <div style={{ width: '100%', maxWidth: '300px' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>Display Name</label>
+                <div style={{ width: '100%', maxWidth: '300px', textAlign: 'center' }}>
+                    <label style={{ display: 'block', marginBottom: '0.2rem', color: 'var(--color-text-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Soul Identity</label>
+                    <div style={{
+                        fontSize: '1.4rem',
+                        fontWeight: '800',
+                        color: 'var(--color-secondary)',
+                        marginBottom: '0.5rem',
+                        textShadow: '0 0 10px rgba(255,215,0,0.3)'
+                    }}>
+                        {user?.behavioralProfile?.archetype_name || "New Soul"}
+                    </div>
                     <input
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder="Your name..."
-                        style={{ fontSize: '1.2rem', textAlign: 'center', fontWeight: 'bold' }}
+                        style={{ fontSize: '1rem', textAlign: 'center', fontWeight: 'bold', background: 'transparent', border: 'none', borderBottom: '1px solid rgba(255,215,0,0.2)' }}
                     />
                 </div>
             </div>
+
+            {/* Psychological Statistics */}
+            {user?.behavioralProfile && (
+                <div style={{
+                    display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px',
+                    marginBottom: '2rem', padding: '1rem',
+                    background: 'rgba(255,255,255,0.02)', borderRadius: '16px',
+                    border: '1px solid rgba(255,255,255,0.05)'
+                }}>
+                    {Object.entries(user.behavioralProfile.calculated_indexes).map(([key, val]) => (
+                        <div key={key} style={{ textAlign: 'center' }}>
+                            <div style={{ fontSize: '0.6rem', opacity: 0.5, textTransform: 'uppercase' }}>
+                                {key.replace(/_index/g, '').replace(/_/g, ' ')}
+                            </div>
+                            <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--color-accent)' }}>{val}%</div>
+                            <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px', marginTop: '4px' }}>
+                                <div style={{ width: `${val}%`, height: '100%', background: 'var(--color-accent)', borderRadius: '2px' }}></div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
 
             <div style={{ marginBottom: '1.5rem' }}>
                 <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>Bio</label>

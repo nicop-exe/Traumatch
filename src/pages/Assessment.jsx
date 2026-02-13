@@ -1,7 +1,4 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { AppContext } from '../App';
-import { ShieldCheck, ChevronRight, SkipForward } from 'lucide-react';
+import { generateBehavioralProfile } from '../utils/behavioralEngine';
 
 const Assessment = () => {
     const { user, setUser } = React.useContext(AppContext);
@@ -14,68 +11,122 @@ const Assessment = () => {
     const QUESTION_POOL = [
         {
             id: 'q1',
-            type: 'single',
             text: "How do you usually process a difficult day?",
             options: [
-                { label: "I isolate and reflect in silence", trait: "Deep Thinker", type: 'positive' },
-                { label: "I seek comfort in music or art", trait: "Creative Soul", type: 'positive' },
-                { label: "I feel overwhelmed and anxious", trait: "Anxiety", type: 'trauma' },
-                { label: "I talk it out with someone I trust", trait: "Open Book", type: 'positive' }
+                {
+                    label: "I isolate and reflect in silence",
+                    trait: "Reflection",
+                    dimensions: { energy_style: 'introvert_regulated', emotional_regulation_style: 'conscious_regulator' },
+                    weights: { self_awareness_index: 15, emotional_regulation_index: 10 }
+                },
+                {
+                    label: "I seek comfort in music or art",
+                    trait: "Creative",
+                    dimensions: { energy_style: 'introvert_regulated', life_orientation: 'creative_disruptor' },
+                    weights: { self_awareness_index: 10 }
+                },
+                {
+                    label: "I feel overwhelmed and anxious",
+                    trait: "Sensitive",
+                    dimensions: { emotional_regulation_style: 'reactive_intense', attachment_style: 'anxious' },
+                    weights: { reactivity_index: 20, security_vincular_index: -10 }
+                },
+                {
+                    label: "I talk it out with someone I trust",
+                    trait: "Communicative",
+                    dimensions: { energy_style: 'extrovert_expansive', attachment_style: 'secure' },
+                    weights: { security_vincular_index: 15, self_awareness_index: 5 }
+                }
             ]
         },
         {
             id: 'q2',
-            type: 'single',
             text: "What is your biggest fear in a relationship?",
             options: [
-                { label: "Being misunderstood", trait: "Sensitive", type: 'positive' },
-                { label: "Being abandoned", trait: "Abandonment Issues", type: 'trauma' },
-                { label: "Losing my independence", trait: "Independent", type: 'positive' },
-                { label: "Not being 'enough'", trait: "Insecurity", type: 'trauma' }
+                {
+                    label: "Being misunderstood",
+                    trait: "Depth",
+                    dimensions: { attachment_style: 'anxious', conflict_style: 'people_pleaser' },
+                    weights: { self_awareness_index: 10, security_vincular_index: -5 }
+                },
+                {
+                    label: "Being abandoned",
+                    trait: "Loyal",
+                    dimensions: { attachment_style: 'anxious', emotional_regulation_style: 'affective_dependent' },
+                    weights: { security_vincular_index: -15, reactivity_index: 15 }
+                },
+                {
+                    label: "Losing my independence",
+                    trait: "Free",
+                    dimensions: { attachment_style: 'avoidant', energy_style: 'extrovert_impulsive' },
+                    weights: { security_vincular_index: -10, self_awareness_index: 5 }
+                },
+                {
+                    label: "Not being 'enough'",
+                    trait: "Humble",
+                    dimensions: { attachment_style: 'anxious', conflict_style: 'people_pleaser' },
+                    weights: { self_awareness_index: 15, security_vincular_index: -10 }
+                }
             ]
         },
         {
             id: 'q3',
-            type: 'single',
-            text: "When you look at the stars, what do you feel?",
+            text: "How do you handle conflict with others?",
             options: [
-                { label: "Small and insignificant", trait: "Existential Dread", type: 'trauma' },
-                { label: "Connected to everything", trait: "Spiritual", type: 'positive' },
-                { label: "Curiosity and wonder", trait: "Inquisitive", type: 'positive' },
-                { label: "A sense of deep loneliness", trait: "Loneliness", type: 'trauma' }
+                {
+                    label: "I shut down and avoid it",
+                    trait: "Quiet",
+                    dimensions: { conflict_style: 'withdrawer', attachment_style: 'avoidant' },
+                    weights: { emotional_regulation_index: -10, security_vincular_index: -10 }
+                },
+                {
+                    label: "I face it head-on with honesty",
+                    trait: "Direct",
+                    dimensions: { conflict_style: 'direct_resolver', emotional_regulation_style: 'conscious_regulator' },
+                    weights: { self_awareness_index: 20, emotional_regulation_index: 20 }
+                },
+                {
+                    label: "I try to keep the peace at any cost",
+                    trait: "Harmonizer",
+                    dimensions: { conflict_style: 'people_pleaser', emotional_regulation_style: 'affective_dependent' },
+                    weights: { security_vincular_index: 5, reactivity_index: -5 }
+                },
+                {
+                    label: "I feel an intense urge to win",
+                    trait: "Intense",
+                    dimensions: { conflict_style: 'escalator', energy_style: 'extrovert_impulsive' },
+                    weights: { reactivity_index: 25, emotional_regulation_index: -15 }
+                }
             ]
         },
         {
             id: 'q4',
-            type: 'single',
-            text: "How do you handle conflict with others?",
+            text: "When facing a new project or adventure...",
             options: [
-                { label: "I shut down and avoid it", trait: "Avoidant", type: 'trauma' },
-                { label: "I try to keep the peace at any cost", trait: "People Pleaser", type: 'trauma' },
-                { label: "I face it head-on with honesty", trait: "Direct", type: 'positive' },
-                { label: "I use humor to deflect", trait: "Witty", type: 'positive' }
-            ]
-        },
-        {
-            id: 'q5',
-            type: 'single',
-            text: "What does 'home' mean to you?",
-            options: [
-                { label: "A place where I can hide", trait: "Introverted", type: 'positive' },
-                { label: "A person, not a place", trait: "Romantic", type: 'positive' },
-                { label: "Somewhere I haven't found yet", trait: "Restless Soul", type: 'trauma' },
-                { label: "Chaos and noise", trait: "Family Trauma", type: 'trauma' }
-            ]
-        },
-        {
-            id: 'q6',
-            type: 'single',
-            text: "What is your 'guilty pleasure' when feeling down?",
-            options: [
-                { label: "Sad movies and crying", trait: "Melancholic", type: 'trauma' },
-                { label: "Eating my feelings", trait: "Emotional Eater", type: 'trauma' },
-                { label: "Cleaning everything", trait: "Perfectionist", type: 'positive' },
-                { label: "Sleeping for 12 hours", trait: "Exhausted", type: 'trauma' }
+                {
+                    label: "I need a clear plan and stability",
+                    trait: "Planner",
+                    dimensions: { life_orientation: 'stable_builder', energy_style: 'introvert_regulated' },
+                    weights: { emotional_regulation_index: 10 }
+                },
+                {
+                    label: "I dive in and figure it out as I go",
+                    trait: "Adventurous",
+                    dimensions: { life_orientation: 'explorer', energy_style: 'extrovert_impulsive' },
+                    weights: { reactivity_index: 10 }
+                },
+                {
+                    label: "I look for a creative or unique angle",
+                    trait: "Visionary",
+                    dimensions: { life_orientation: 'creative_disruptor', self_awareness_index: 15 },
+                    weights: { self_awareness_index: 15 }
+                },
+                {
+                    label: "I prioritize safety and practicality",
+                    trait: "Pragmatic",
+                    dimensions: { life_orientation: 'protector_pragmatic', conflict_style: 'direct_resolver' },
+                    weights: { emotional_regulation_index: 5, security_vincular_index: 5 }
+                }
             ]
         }
     ];
@@ -104,32 +155,36 @@ const Assessment = () => {
     };
 
     const finishAssessment = async (finalAnswers) => {
-        // Collect all traits from the various question formats
-        const extraTraits = Object.values(finalAnswers)
-            .filter(a => a && typeof a === 'object' && a.trait);
+        // Generate Behavioral Profile
+        const behavioralProfile = generateBehavioralProfile(finalAnswers);
 
-        const selectedPositive = extraTraits
-            .filter(a => a.type === 'positive')
+        // Collect simple traits for legacy compatibility
+        const selectedPositive = Object.values(finalAnswers)
+            .filter(a => a && a.trait && !a.dimensions) // Legacy or generic
             .map(a => a.trait);
 
-        const selectedTraumas = extraTraits
-            .filter(a => a.type === 'trauma')
+        // Map dimensions from the new questions to positive/trauma tags for UI
+        const dimensionTraits = Object.values(finalAnswers)
+            .filter(a => a && a.trait && a.dimensions)
             .map(a => a.trait);
 
         const profileUpdate = {
             name: user?.name || "New Soul",
             email: user?.email || "",
             avatar: user?.avatar || "",
-            positive: [...new Set([...(user?.positive || []), ...selectedPositive])],
-            traumas: [...new Set([...(user?.traumas || []), ...selectedTraumas])],
+            positive: [...new Set([...(user?.positive || []), ...selectedPositive, ...dimensionTraits])],
+            behavioralProfile,
             intent: finalAnswers?.intent || "",
-            interests: finalAnswers?.interests || []
+            interests: finalAnswers?.interests || [],
+            assessmentCompleted: true,
+            updatedAt: serverTimestamp()
         };
 
         try {
+            const { db } = await import('../firebase');
+            const { doc, setDoc } = await import('firebase/firestore');
+
             if (user?.uid) {
-                const { db } = await import('../firebase');
-                const { doc, setDoc } = await import('firebase/firestore');
                 await setDoc(doc(db, "users", user.uid), profileUpdate, { merge: true });
             }
             setUser({ ...user, ...profileUpdate });
