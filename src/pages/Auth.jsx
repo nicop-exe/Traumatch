@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../App';
 import { auth, db, googleProvider } from '../firebase';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithRedirect, getRedirectResult } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 
 const Auth = () => {
@@ -17,6 +17,23 @@ const Auth = () => {
     const [name, setName] = React.useState("");
     const [phone, setPhone] = React.useState("");
     const [error, setError] = React.useState("");
+
+    // Handle Redirect Result
+    React.useEffect(() => {
+        const handleRedirect = async () => {
+            try {
+                const result = await getRedirectResult(auth);
+                if (result) {
+                    // New Google User needs to go to assessment
+                    navigate('/assessment');
+                }
+            } catch (err) {
+                console.error("Redirect Error:", err);
+                setError(err.message);
+            }
+        };
+        handleRedirect();
+    }, [navigate]);
 
     const handleAuth = async (e) => {
         e.preventDefault();
@@ -51,11 +68,12 @@ const Auth = () => {
 
     const handleGoogleSignIn = async () => {
         setError("");
+        setIsLoading(true);
         try {
-            await signInWithPopup(auth, googleProvider);
-            navigate('/assessment');
+            await signInWithRedirect(auth, googleProvider);
         } catch (err) {
             setError(err.message);
+            setIsLoading(false);
         }
     };
 
