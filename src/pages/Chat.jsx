@@ -2,20 +2,20 @@ import React, { useContext, useState, useEffect } from 'react';
 import { AppContext } from '../App';
 import * as Tone from 'tone';
 import { Mic, Send, Play, ChevronLeft, Lock, Info } from 'lucide-react';
-import { db } from '../firebase';
+import { db, storage } from '../firebase';
 import { collection, getDocs, query, orderBy, onSnapshot, addDoc, setDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const Chat = () => {
-    const { matches } = useContext(AppContext);
+    const { matches, setMatches, user } = useContext(AppContext);
     const [selectedMatch, setSelectedMatch] = useState(null);
     const [messages, setMessages] = useState([]); // { text, audio, sender }
     const [isRecording, setIsRecording] = useState(false);
     const [recorder, setRecorder] = useState(null);
     const [inputText, setInputText] = useState("");
     const [isLoadingMatches, setIsLoadingMatches] = useState(true);
-    const { setMatches, user } = useContext(AppContext);
+    const [isUploading, setIsUploading] = useState(false);
     const messagesEndRef = React.useRef(null);
-    const [showDebug, setShowDebug] = useState(false); // Debug toggle
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -28,7 +28,6 @@ const Chat = () => {
     // Sync loading state with global matches
     useEffect(() => {
         if (user) {
-            // Once we have a user and matches (even empty), we are no longer "loading" initial state
             setIsLoadingMatches(false);
         }
     }, [user, matches]);
@@ -44,7 +43,6 @@ const Chat = () => {
     // Initialize Tone.js Recorder
     useEffect(() => {
         const initAudio = async () => {
-            // Only init if we are in a chat
             if (selectedMatch && !recorder) {
                 const newRecorder = new Tone.Recorder();
                 const mic = new Tone.UserMedia();
@@ -61,26 +59,59 @@ const Chat = () => {
         };
 
         if (selectedMatch) initAudio();
-
-        return () => {
-            // Cleanup if needed
-        };
-    }, [selectedMatch]);
+    }, [selectedMatch, recorder]);
 
     const handleRecordToggle = async () => {
-        if (!recorder) return;
+        if (!recorder) {
+            const newRecorder = new Tone.Recorder();
+            const mic = new Tone.UserMedia();
+            try {
+                await mic.open();
+                mic.connect(newRecorder);
+                setRecorder(newRecorder);
+                alert("Microphone ready. Press again to record.");
+                return;
+            } catch (e) {
+                alert("Permission denied. Enable microphone in settings.");
+                return;
+            }
+        }
 
         if (!isRecording) {
-            // Start
-            await Tone.start();
-            recorder.start();
-            setIsRecording(true);
+            // Start recording
+            try {
+                await Tone.start();
+                recorder.start();
+                setIsRecording(true);
+            } catch (e) {
+                console.error("Recording start error:", e);
+            }
         } else {
-            // Stop
-            const recording = await recorder.stop();
-            const url = URL.createObjectURL(recording);
-            setMessages(prev => [...prev, { audio: url, sender: 'me' }]);
+            // Stop recording
             setIsRecording(false);
+            setIsUploading(true);
+            try {
+                const recording = await recorder.stop();
+                const chatId = getChatId(user.uid, selectedMatch.id);
+                const fileName = `audio_${Date.now()}.webm`;
+                const storageRef = ref(storage, `chats/${chatId}/${fileName}`);
+
+                // Upload
+                const snapshot = await uploadBytes(storageRef, recording);
+                const downloadURL = await getDownloadURL(snapshot.ref);
+
+                // Save to Firestore
+                await addDoc(collection(db, "chats", chatId, "messages"), {
+                    audio: downloadURL,
+                    senderId: user.uid,
+                    timestamp: serverTimestamp()
+                });
+            } catch (e) {
+                console.error("Audio error:", e);
+                alert("Could not send audio. Check connection.");
+            } finally {
+                setIsUploading(false);
+            }
         }
     };
 
@@ -92,9 +123,6 @@ const Chat = () => {
         if (!user?.uid || !selectedMatch?.id) return;
 
         const chatId = getChatId(user.uid, selectedMatch.id);
-        console.log("Joined Chat Sanctuary:", chatId);
-
-        // Listen to all messages in the collection without ordering (to avoid index dependency)
         const q = query(collection(db, "chats", chatId, "messages"));
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -103,7 +131,6 @@ const Chat = () => {
                 ...doc.data()
             }));
 
-            // Sort locally by timestamp (if it exists) to ensure chronological order
             const sortedMessages = newMessages.sort((a, b) => {
                 const timeA = a.timestamp?.seconds || 0;
                 const timeB = b.timestamp?.seconds || 0;
@@ -111,11 +138,9 @@ const Chat = () => {
             });
 
             setMessages(sortedMessages);
-            // Non-blocking scroll
             setTimeout(scrollToBottom, 50);
         }, (error) => {
             console.error("Chat listener fatal error:", error);
-            alert("Chat connection failed. Check your internet or Firestore rules.");
         });
 
         return () => unsubscribe();
@@ -138,8 +163,8 @@ const Chat = () => {
             await addDoc(collection(db, "chats", chatId, "messages"), messageData);
         } catch (e) {
             console.error("Error sending message:", e);
-            setInputText(currentInput); // Restore text on failure
-            alert("Could not send message. Verify permissions.");
+            setInputText(currentInput);
+            alert("Could not send message.");
         }
     };
 
@@ -168,7 +193,6 @@ const Chat = () => {
             });
         } catch (e) {
             console.error("Error editing message:", e);
-            alert("Edit failed. You may not have permissions.");
         }
     };
 
@@ -185,7 +209,6 @@ const Chat = () => {
             });
         } catch (e) {
             console.error("Error deleting message:", e);
-            alert("Delete failed.");
         }
     };
 
@@ -249,21 +272,7 @@ const Chat = () => {
                     />
                     <span style={{ fontWeight: 'bold' }}>{selectedMatch.name}</span>
                 </div>
-                <button
-                    onClick={() => setShowDebug(!showDebug)}
-                    style={{ fontSize: '0.6rem', color: 'var(--color-text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}
-                >
-                    {showDebug ? 'Hide IDs' : 'Show IDs'}
-                </button>
             </div>
-
-            {showDebug && (
-                <div style={{ padding: '5px 10px', fontSize: '0.6rem', background: '#000', color: '#0f0', borderBottom: '1px solid #333' }}>
-                    <div>My UID: {user?.uid}</div>
-                    <div>Target ID: {selectedMatch?.id}</div>
-                    <div>Room: {[user?.uid, selectedMatch?.id].sort().join('_')}</div>
-                </div>
-            )}
 
             {/* Messages */}
             <div style={{
@@ -296,8 +305,12 @@ const Chat = () => {
                             <>
                                 {msg.text && <p style={{ margin: 0 }}>{msg.text}</p>}
                                 {msg.audio && (
-                                    <button onClick={() => playAudio(msg.audio)} style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                        <Play size={16} fill="currentColor" /> Audio Note
+                                    <button onClick={() => playAudio(msg.audio)} style={{
+                                        display: 'flex', alignItems: 'center', gap: '8px',
+                                        background: 'rgba(0,0,0,0.2)', border: 'none', padding: '8px 12px',
+                                        borderRadius: '12px', color: 'inherit', cursor: 'pointer'
+                                    }}>
+                                        <Play size={16} fill="currentColor" /> Voice Note
                                     </button>
                                 )}
                             </>
@@ -325,18 +338,23 @@ const Chat = () => {
                     </div>
                 ))}
                 <div ref={messagesEndRef} />
+                {isUploading && (
+                    <div style={{ alignSelf: 'flex-end', opacity: 0.6, fontSize: '0.8rem', fontStyle: 'italic' }}>
+                        Sending soul note...
+                    </div>
+                )}
             </div>
 
-            {/* Input area style adjustment for fixed nav in Layout */}
+            {/* Input area */}
             <div style={{
-                padding: '0.3rem 0.6rem', // Even less padding per user request
+                padding: '0.3rem 0.6rem',
                 display: 'flex',
                 gap: '8px',
                 alignItems: 'center',
                 background: 'rgba(10, 25, 47, 0.98)',
                 backdropFilter: 'blur(15px)',
                 borderTop: '1px solid rgba(255,255,255,0.1)',
-                paddingBottom: 'calc(var(--nav-height) + 0.3rem)', // Ultra-compact
+                paddingBottom: 'calc(var(--nav-height) + 0.3rem)',
                 boxShadow: '0 -10px 30px rgba(0,0,0,0.3)'
             }}>
                 <button
