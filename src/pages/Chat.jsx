@@ -61,8 +61,32 @@ const Chat = () => {
     }, [selectedMatch]);
 
     const handleRecordToggle = async () => {
-        // Stop logic
-        if (isRecording && recorder) {
+        if (!recorder) {
+            const newRecorder = new Tone.Recorder();
+            const mic = new Tone.UserMedia();
+            try {
+                await mic.open();
+                mic.connect(newRecorder);
+                setRecorder(newRecorder);
+                alert("Microphone ready. Press again to record.");
+                return;
+            } catch (e) {
+                alert("Permission denied. Enable microphone in settings.");
+                return;
+            }
+        }
+
+        if (!isRecording) {
+            // Start recording
+            try {
+                await Tone.start();
+                recorder.start();
+                setIsRecording(true);
+            } catch (e) {
+                console.error("Recording start error:", e);
+            }
+        } else {
+            // Stop recording
             setIsRecording(false);
             setIsUploading(true);
             try {
@@ -71,42 +95,22 @@ const Chat = () => {
                 const fileName = `audio_${Date.now()}.webm`;
                 const storageRef = ref(storage, `chats/${chatId}/${fileName}`);
 
+                // Upload
                 const snapshot = await uploadBytes(storageRef, recording);
                 const downloadURL = await getDownloadURL(snapshot.ref);
 
+                // Save to Firestore
                 await addDoc(collection(db, "chats", chatId, "messages"), {
                     audio: downloadURL,
                     senderId: user.uid,
                     timestamp: serverTimestamp()
                 });
             } catch (e) {
-                console.error("Audio stop error:", e);
+                console.error("Audio error:", e);
                 alert("Could not send audio. Check connection.");
             } finally {
                 setIsUploading(false);
             }
-            return;
-        }
-
-        // Start logic (Init + Start in one flow for permissions)
-        try {
-            await Tone.start();
-            let currentRecorder = recorder;
-
-            if (!currentRecorder) {
-                const newRecorder = new Tone.Recorder();
-                const mic = new Tone.UserMedia();
-                await mic.open();
-                mic.connect(newRecorder);
-                setRecorder(newRecorder);
-                currentRecorder = newRecorder;
-            }
-
-            currentRecorder.start();
-            setIsRecording(true);
-        } catch (e) {
-            console.error("Recording start error:", e);
-            alert("Microphone denied. Enable it in browser settings and try again.");
         }
     };
 
