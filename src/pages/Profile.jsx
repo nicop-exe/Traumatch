@@ -153,7 +153,7 @@ const Profile = () => {
 
     if (!user) return <div style={{ padding: '2rem', textAlign: 'center' }}>Please log in.</div>;
 
-    const needsAssessment = !user?.behavioralProfile;
+    const needsAssessment = !user?.behavioralProfile?.archetype_name;
 
     return (
         <div className="page-container">
@@ -195,14 +195,39 @@ const Profile = () => {
                         textShadow: needsAssessment ? 'none' : '0 0 10px rgba(255,215,0,0.3)',
                         opacity: needsAssessment ? 0.5 : 1
                     }}>
-                        {user?.behavioralProfile?.archetype_name || "Sin Clasificar"}
+                        {user?.behavioralProfile?.archetype_name || "Espíritu sin Clasificar"}
                     </div>
-                    {needsAssessment && (
+
+                    {needsAssessment ? (
                         <button
                             onClick={() => navigate('/assessment')}
-                            style={{ fontSize: '0.7rem', color: 'var(--color-accent)', textDecoration: 'underline', background: 'none', border: 'none', padding: 0, marginBottom: '0.5rem', cursor: 'pointer' }}
+                            className="btn btn-primary"
+                            style={{
+                                padding: '10px 20px',
+                                fontSize: '0.8rem',
+                                marginBottom: '1rem',
+                                width: '100%',
+                                boxShadow: '0 0 15px rgba(100, 255, 218, 0.2)'
+                            }}
                         >
-                            Completar Soul Assessment →
+                            Completar Soul Assessment ⚛️
+                        </button>
+                    ) : (
+                        <button
+                            onClick={() => navigate('/assessment')}
+                            style={{
+                                fontSize: '0.7rem',
+                                color: 'var(--color-accent)',
+                                textDecoration: 'underline',
+                                background: 'none',
+                                border: 'none',
+                                padding: 0,
+                                marginBottom: '1rem',
+                                cursor: 'pointer',
+                                opacity: 0.7
+                            }}
+                        >
+                            Repetir Assessment →
                         </button>
                     )}
                     <input
