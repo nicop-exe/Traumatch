@@ -74,57 +74,60 @@ const Chat = () => {
         }
     };
 
+    // Generate a consistent Chat ID between two users
+    const getChatId = (uid1, uid2) => [uid1, uid2].sort().join('_');
+
     // Real-time Messages Logic
     useEffect(() => {
-        if (!user || !selectedMatch) return;
+        if (!user?.uid || !selectedMatch?.id) return;
 
-        // Consistent chatId: smallerUID_largerUID
-        const chatId = [user.uid, selectedMatch.id || selectedMatch.uid].sort().join('_');
+        const chatId = getChatId(user.uid, selectedMatch.id);
         console.log("Joined Chat Sanctuary:", chatId);
 
-        const q = query(
-            collection(db, "chats", chatId, "messages"),
-            orderBy("timestamp", "asc")
-        );
+        // Listen to all messages in the collection without ordering (to avoid index dependency)
+        const q = query(collection(db, "chats", chatId, "messages"));
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const newMessages = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
             }));
-            setMessages(newMessages);
-        }, (error) => {
-            console.error("Chat listener primary error (ordering/index):", error);
-            // Robust Fallback: listen without ordering to ensure functionality despite index/metadata issues
-            const fallbackQ = query(collection(db, "chats", chatId, "messages"));
-            return onSnapshot(fallbackQ, (snap) => {
-                const msgs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                // Sort by internal timestamp manually if available
-                msgs.sort((a, b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0));
-                setMessages(msgs);
+
+            // Sort locally by timestamp (if it exists) to ensure chronological order
+            const sortedMessages = newMessages.sort((a, b) => {
+                const timeA = a.timestamp?.seconds || 0;
+                const timeB = b.timestamp?.seconds || 0;
+                return timeA - timeB;
             });
+
+            setMessages(sortedMessages);
+        }, (error) => {
+            console.error("Chat listener fatal error:", error);
+            alert("Chat connection failed. Check your internet or Firestore rules.");
         });
 
         return () => unsubscribe();
-    }, [user, selectedMatch]);
+    }, [user?.uid, selectedMatch?.id]);
 
     const handleSendMessage = async () => {
-        if (!inputText.trim() || !user || !selectedMatch) return;
+        if (!inputText.trim() || !user?.uid || !selectedMatch?.id) return;
 
-        const chatId = [user.uid, selectedMatch.id || selectedMatch.uid].sort().join('_');
+        const chatId = getChatId(user.uid, selectedMatch.id);
         const messageData = {
             text: inputText,
             senderId: user.uid,
             timestamp: serverTimestamp()
         };
 
+        const currentInput = inputText;
         setInputText("");
 
         try {
             await addDoc(collection(db, "chats", chatId, "messages"), messageData);
         } catch (e) {
             console.error("Error sending message:", e);
-            alert("Connection lost. Try again.");
+            setInputText(currentInput); // Restore text on failure
+            alert("Could not send message. Verify permissions.");
         }
     };
 
@@ -143,7 +146,7 @@ const Chat = () => {
         const newText = prompt("Edit your message:", currentText);
         if (newText === null || newText === currentText || !newText.trim()) return;
 
-        const chatId = [user.uid, selectedMatch.id || selectedMatch.uid].sort().join('_');
+        const chatId = getChatId(user.uid, selectedMatch.id);
         try {
             await setDoc(doc(db, "chats", chatId, "messages", msgId), {
                 text: newText,
@@ -152,21 +155,23 @@ const Chat = () => {
             }, { merge: true });
         } catch (e) {
             console.error("Error editing message:", e);
+            alert("Edit failed. You may not have permissions.");
         }
     };
 
     const handleDeleteMessage = async (msgId) => {
         if (!window.confirm("Delete this message?")) return;
 
-        const chatId = [user.uid, selectedMatch.id || selectedMatch.uid].sort().join('_');
+        const chatId = getChatId(user.uid, selectedMatch.id);
         try {
             await setDoc(doc(db, "chats", chatId, "messages", msgId), {
                 deleted: true,
                 text: "Message deleted",
-                timestamp: serverTimestamp() // Optional: keep original
+                timestamp: serverTimestamp()
             }, { merge: true });
         } catch (e) {
             console.error("Error deleting message:", e);
+            alert("Delete failed.");
         }
     };
 
