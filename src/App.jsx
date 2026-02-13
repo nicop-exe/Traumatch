@@ -10,7 +10,7 @@ import Layout from './components/Layout';
 
 import { auth, db } from './firebase';
 import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc, collection, onSnapshot } from "firebase/firestore";
+import { doc, getDoc, setDoc, collection, onSnapshot } from "firebase/firestore";
 
 // Simple Context for App State
 export const AppContext = React.createContext(null);
