@@ -435,25 +435,25 @@ const Chat = () => {
 
             {/* Input area */}
             <div style={{
-                padding: '1rem',
+                padding: '0.8rem 1rem',
                 display: 'flex',
                 gap: '12px',
                 alignItems: 'center',
-                background: 'rgba(10, 25, 47, 0.9)',
-                backdropFilter: 'blur(20px)',
-                borderTop: '1px solid var(--glass-border)',
-                paddingBottom: 'calc(var(--nav-height) + 1rem)',
-                boxShadow: '0 -10px 30px rgba(0,0,0,0.4)',
-                position: 'relative'
+                background: 'rgba(10, 25, 47, 0.95)',
+                backdropFilter: 'blur(25px)',
+                paddingBottom: 'calc(var(--nav-height) + 0.5rem)',
+                boxShadow: '0 -10px 40px rgba(0,0,0,0.5)',
+                position: 'relative',
+                zIndex: 100
             }}>
                 <button
                     onClick={handleRecordToggle}
                     className="icon-btn"
                     style={{
                         width: '52px', height: '52px',
-                        backgroundColor: isRecording ? '#ff4444' : 'var(--glass-bg)',
+                        backgroundColor: isRecording ? '#ff4444' : 'rgba(255,255,255,0.05)',
                         color: 'white',
-                        border: isRecording ? 'none' : '1px solid var(--glass-border)',
+                        border: 'none',
                         boxShadow: isRecording ? '0 0 20px rgba(255, 68, 68, 0.4)' : 'none'
                     }}
                 >
@@ -468,7 +468,13 @@ const Chat = () => {
                     onChange={(e) => setInputText(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                     placeholder="Escribe una resonancia..."
-                    style={{ flex: 1, margin: 0, padding: '0.9rem 1.5rem', border: '1px solid var(--glass-border)' }}
+                    style={{
+                        flex: 1,
+                        margin: 0,
+                        padding: '0.9rem 1.5rem',
+                        border: 'none',
+                        background: 'rgba(255,255,255,0.05)'
+                    }}
                 />
                 <button
                     onClick={handleSendMessage}
@@ -477,7 +483,8 @@ const Chat = () => {
                         width: '52px', height: '52px',
                         color: 'var(--color-primary)',
                         background: 'var(--color-secondary)',
-                        boxShadow: 'none'
+                        boxShadow: 'none',
+                        border: 'none'
                     }}
                 >
                     <Send size={22} />
