@@ -12,7 +12,8 @@ const Chat = () => {
     const [liveSelectedMatch, setLiveSelectedMatch] = useState(null);
     const [messages, setMessages] = useState([]); // { text, audio, sender }
     const [isRecording, setIsRecording] = useState(false);
-    const [recorder, setRecorder] = useState(null);
+    const [mediaRecorder, setMediaRecorder] = useState(null);
+    const [audioChunks, setAudioChunks] = useState([]);
     const [inputText, setInputText] = useState("");
     const [isLoadingMatches, setIsLoadingMatches] = useState(true);
     const [isUploading, setIsUploading] = useState(false);
@@ -61,65 +62,65 @@ const Chat = () => {
     }, [selectedMatch]);
 
     const handleRecordToggle = async () => {
-        if (!recorder) {
-            try {
-                // Ensure Tone context is started on first click
-                await Tone.start();
-
-                const newRecorder = new Tone.Recorder();
-                const mic = new Tone.UserMedia();
-
-                // Request permission
-                await mic.open();
-                mic.connect(newRecorder);
-                setRecorder(newRecorder);
-
-                alert("✨ Microphone Bonded! You can now record. Press again to start your soul note.");
-                return;
-            } catch (e) {
-                console.error("Mic error:", e);
-                const errorMsg = e.name === "NotAllowedError" || e.name === "PermissionDeniedError"
-                    ? "Microphone access denied. Please click the lock icon in your browser's address bar and 'Allow' the microphone, then refresh."
-                    : "Could not access microphone. Ensure no other app is using it.";
-                alert(errorMsg);
-                return;
-            }
+        if (isRecording && mediaRecorder) {
+            // STOP RECORDING
+            mediaRecorder.stop();
+            setIsRecording(false);
+            return;
         }
 
-        if (!isRecording) {
-            // Start recording
-            try {
-                await Tone.start();
-                recorder.start();
-                setIsRecording(true);
-            } catch (e) {
-                console.error("Recording start error:", e);
-                alert("Oops! The void interfered. Try again.");
-            }
-        } else {
-            // Stop recording
-            setIsRecording(false);
-            setIsUploading(true);
-            try {
-                const recording = await recorder.stop();
-                const chatId = getChatId(user.uid, selectedMatch.id);
-                const fileName = `audio_${Date.now()}.webm`;
-                const storageRef = ref(storage, `chats/${chatId}/${fileName}`);
+        // START RECORDING
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-                const snapshot = await uploadBytes(storageRef, recording);
-                const downloadURL = await getDownloadURL(snapshot.ref);
+            // Detect best MIME type for the device
+            const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+                ? 'audio/webm;codecs=opus'
+                : 'audio/mp4';
 
-                await addDoc(collection(db, "chats", chatId, "messages"), {
-                    audio: downloadURL,
-                    senderId: user.uid,
-                    timestamp: serverTimestamp()
-                });
-            } catch (e) {
-                console.error("Audio error:", e);
-                alert("The note was lost in the void. Check connection.");
-            } finally {
-                setIsUploading(false);
-            }
+            const recorder = new MediaRecorder(stream, { mimeType });
+            const chunks = [];
+
+            recorder.ondataavailable = (e) => {
+                if (e.data.size > 0) chunks.push(e.data);
+            };
+
+            recorder.onstop = async () => {
+                const audioBlob = new Blob(chunks, { type: mimeType });
+
+                // Cleanup stream
+                stream.getTracks().forEach(track => track.stop());
+
+                setIsUploading(true);
+                try {
+                    const chatId = getChatId(user.uid, selectedMatch.id);
+                    const extension = mimeType.includes('mp4') ? 'mp4' : 'webm';
+                    const fileName = `audio_${Date.now()}.${extension}`;
+                    const storageRef = ref(storage, `chats/${chatId}/${fileName}`);
+
+                    const snapshot = await uploadBytes(storageRef, audioBlob);
+                    const downloadURL = await getDownloadURL(snapshot.ref);
+
+                    await addDoc(collection(db, "chats", chatId, "messages"), {
+                        audio: downloadURL,
+                        senderId: user.uid,
+                        timestamp: serverTimestamp(),
+                        mimeType: mimeType // Store for player hint
+                    });
+                } catch (e) {
+                    console.error("Upload error:", e);
+                    alert("Soul note lost in transmission. Check connection.");
+                } finally {
+                    setIsUploading(false);
+                }
+            };
+
+            recorder.start();
+            setMediaRecorder(recorder);
+            setIsRecording(true);
+        } catch (e) {
+            console.error("Mic access error:", e);
+            alert("Microphone access denied. Please enable it in your browser settings.");
         }
     };
 
@@ -216,8 +217,12 @@ const Chat = () => {
     };
 
     const playAudio = (url) => {
-        const player = new Tone.Player(url).toDestination();
-        player.autostart = true;
+        // Use native audio player for playback as it's more robust for different MIME types
+        const audio = new Audio(url);
+        audio.play().catch(e => {
+            console.error("Playback error:", e);
+            alert("Could not play soul note. Format might be incompatible.");
+        });
     };
 
     const formatTimestamp = (ts) => {
