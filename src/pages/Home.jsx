@@ -8,7 +8,7 @@ const Home = () => {
     // Curated Database of Real YouTube Content
     const VIDEO_DATABASE = {
         'Anxiety': [
-            { title: "Heal Anxiety & Overthinking", channel: "The School of Life", id: "5zfnl2dJ1yI", type: "video" },
+            { title: "Why We're All So Anxious", channel: "The School of Life", id: "mW0gj3n4D1Q", type: "video" },
             { title: "10 Minute Mindfulness", channel: "Calm", id: "ZToicYcHIOU", type: "meditation" }
         ],
         'Depression': [
@@ -20,7 +20,7 @@ const Home = () => {
             { title: "Flow State Music", channel: "Lofi Girl", id: "jfKfPfyJRdk", type: "music" }
         ],
         'Spiritual': [
-            { title: "The Power of Now", channel: "Eckhart Tolle", id: "j-h4_oV1q1I", type: "video" },
+            { title: "The Power of Now (Summary)", channel: "Eckhart Tolle", id: "6j0zD65Y5S8", type: "video" },
             { title: "Awakening the Mind", channel: "Alan Watts", id: "7YgFl5rT5yw", type: "video" }
         ],
         'General': [
