@@ -20,7 +20,7 @@ const Home = () => {
             { title: "Flow State Music", channel: "Lofi Girl", id: "jfKfPfyJRdk", type: "music" }
         ],
         'Spiritual': [
-            { title: "The Power of Now", channel: "Eckhart Tolle", id: "T4M4uJ8n8e4", type: "video" },
+            { title: "The Power of Now", channel: "Eckhart Tolle", id: "j-h4_oV1q1I", type: "video" },
             { title: "Awakening the Mind", channel: "Alan Watts", id: "7YgFl5rT5yw", type: "video" }
         ],
         'General': [
@@ -109,6 +109,10 @@ const Home = () => {
                                 <img
                                     src={`https://img.youtube.com/vi/${video.id}/hqdefault.jpg`}
                                     alt={video.title}
+                                    onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src = `https://img.youtube.com/vi/${video.id}/mqdefault.jpg`;
+                                    }}
                                     style={{
                                         position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
                                         objectFit: 'cover'

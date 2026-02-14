@@ -354,6 +354,21 @@ const Chat = () => {
                     </div>
                 </div>
 
+                <button
+                    onClick={handleDeleteMatch}
+                    className="icon-btn"
+                    style={{
+                        borderRadius: '12px',
+                        backgroundColor: 'rgba(255, 68, 68, 0.1)',
+                        color: '#ff4444',
+                        border: '1px solid rgba(255, 68, 68, 0.2)',
+                        width: '36px', height: '36px'
+                    }}
+                    title="Eliminar Match"
+                >
+                    <Trash2 size={18} />
+                </button>
+
                 {showDiagnostics && (
                     <div className="card" style={{
                         position: 'absolute', top: '75px', left: '1rem', right: '1rem',
