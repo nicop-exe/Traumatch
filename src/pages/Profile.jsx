@@ -15,7 +15,7 @@ const Profile = () => {
     const [name, setName] = useState(user?.name || "");
     const [bio, setBio] = useState(user?.bio || "");
     const [location, setLocation] = useState(user?.location || "");
-    const [isLocationPrivate, setIsLocationPrivate] = useState(true);
+    const [isLocationPrivate, setIsLocationPrivate] = useState(user?.isLocationPrivate ?? true);
     const [suggestions, setSuggestions] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
     const [positiveTraits, setPositiveTraits] = useState(user?.positive || []);
@@ -29,6 +29,7 @@ const Profile = () => {
             setName(prev => prev || user.name || "");
             setBio(prev => prev || user.bio || "");
             setLocation(prev => prev || user.location || "");
+            setIsLocationPrivate(user.isLocationPrivate ?? true);
             setPositiveTraits(prev => prev.length === 0 ? (user.positive || []) : prev);
             setNegativeTraits(prev => prev.length === 0 ? (user.traumas || []) : prev);
         }
@@ -63,7 +64,8 @@ const Profile = () => {
                 bio: bio || "",
                 positive: positiveTraits || [],
                 traumas: negativeTraits || [],
-                location: location || ""
+                location: location || "",
+                isLocationPrivate: isLocationPrivate
             };
             try {
                 const { db } = await import('../firebase');

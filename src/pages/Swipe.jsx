@@ -260,7 +260,7 @@ const Swipe = () => {
                         {currentUser.bio ? `"${currentUser.bio}"` : "Seeking a meaningful connection..."}
                     </p>
 
-                    {currentUser.location && (
+                    {currentUser.location && !currentUser.isLocationPrivate && (
                         <div style={{ fontSize: '0.9rem', opacity: 0.8, display: 'flex', alignItems: 'center', gap: '8px', marginTop: '0.5rem', color: 'var(--color-accent)' }}>
                             <MapPin size={16} />
                             {currentUser.location}
