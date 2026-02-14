@@ -285,230 +285,232 @@ const Chat = () => {
         } catch (e) {
             console.error("Error deleting message:", e);
         }
-        const handleDeleteMatch = async () => {
-            if (!selectedMatch || !user) return;
-            if (!window.confirm(`¿Estás seguro de que quieres eliminar la conexión con ${selectedMatch.name}? Esta acción no se puede deshacer.`)) return;
-
-            try {
-                // Delete match from user's subcollection
-                await deleteDoc(doc(db, "users", user.uid, "matches", selectedMatch.id));
-
-                // Update local state
-                setMatches(prev => prev.filter(m => m.id !== selectedMatch.id));
-                setSelectedMatch(null);
-                setLiveSelectedMatch(null);
-            } catch (e) {
-                console.error("Error deleting match:", e);
-                alert("Error al eliminar la conexión.");
-            }
-        };
-
-        if (!selectedMatch) {
-            return (
-                <div className="page-container p-page">
-                    <h2 style={{ color: 'var(--color-secondary)', marginBottom: '1.5rem', fontSize: '1.8rem', fontWeight: '800' }}>Matches</h2>
-                    {isLoadingMatches ? (
-                        <div style={{ textAlign: 'center', marginTop: '3rem' }}>
-                            <div className="animate-pulse" style={{ color: 'var(--color-secondary)' }}>Gathering souls...</div>
-                        </div>
-                    ) : matches.length === 0 ? (
-                        <p style={{ color: 'var(--color-text-muted)', textAlign: 'center', marginTop: '3rem' }}>No matches yet. Go swipe!</p>
-                    ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            {matches.map(match => (
-                                <MatchItem key={match.id} match={match} onClick={setSelectedMatch} />
-                            ))}
-                        </div>
-                    )}
-                </div>
-            );
-        }
-
-        return (
-            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
-                {/* Header */}
-                <div style={{
-                    padding: '1rem', borderBottom: '1px solid var(--glass-border)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    background: 'rgba(10, 25, 47, 0.8)',
-                    backdropFilter: 'blur(20px)',
-                    zIndex: 10
-                }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <button onClick={() => setSelectedMatch(null)} className="icon-btn" style={{ borderRadius: '12px' }}><ChevronLeft color="white" /></button>
-                        <img
-                            src={getHighResPhoto(liveSelectedMatch?.avatar || liveSelectedMatch?.photoURL) || `https://ui-avatars.com/api/?background=0a192f&color=ffd700&name=${encodeURIComponent(liveSelectedMatch?.name || 'Soul')}`}
-                            alt={liveSelectedMatch?.name || 'Soul'}
-                            style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--color-secondary)' }}
-                        />
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <span style={{ fontWeight: '800', fontSize: '1.1rem', letterSpacing: '-0.02em' }}>{liveSelectedMatch?.name || 'Conectando...'}</span>
-                            <div
-                                onClick={() => setShowDiagnostics(!showDiagnostics)}
-                                style={{ fontSize: '0.65rem', opacity: 0.6, cursor: 'pointer', color: 'var(--color-accent)' }}
-                            >
-                                {showDiagnostics ? 'Ocultar Estado' : 'Verificar Frecuencia'}
-                            </div>
-                        </div>
-                    </div>
-
-                    {showDiagnostics && (
-                        <div className="card" style={{
-                            position: 'absolute', top: '75px', left: '1rem', right: '1rem',
-                            fontSize: '0.75rem', zIndex: 100, background: 'rgba(0,0,0,0.95)'
-                        }}>
-                            <div style={{ color: 'var(--color-secondary)', fontWeight: 'bold', marginBottom: '8px', fontSize: '0.8rem' }}>Audio Diagnostics:</div>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                                <div>Secure Context: {window.isSecureContext ? '✅' : '❌'}</div>
-                                <div>Media Support: {navigator.mediaDevices ? '✅' : '❌'}</div>
-                                <div>MediaRecorder: {window.MediaRecorder ? '✅' : '❌'}</div>
-                                <div>WebM: {MediaRecorder?.isTypeSupported('audio/webm') ? '✅' : '❌'}</div>
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                {/* Messages */}
-                <div style={{
-                    flex: 1,
-                    overflowY: 'auto',
-                    padding: '1.5rem',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '1.2rem',
-                    WebkitOverflowScrolling: 'touch',
-                    background: 'transparent'
-                }}>
-                    {messages.map((msg, idx) => {
-                        const isMe = msg.senderId === user.uid;
-                        return (
-                            <div key={msg.id || idx}
-                                style={{
-                                    alignSelf: isMe ? 'flex-end' : 'flex-start',
-                                    background: isMe ? 'linear-gradient(135deg, var(--color-secondary) 0%, #e6c200 100%)' : 'var(--glass-bg)',
-                                    color: isMe ? 'var(--color-primary)' : 'white',
-                                    padding: '12px 18px',
-                                    borderRadius: '20px',
-                                    maxWidth: '85%',
-                                    borderBottomRightRadius: isMe ? '4px' : '20px',
-                                    borderBottomLeftRadius: isMe ? '20px' : '4px',
-                                    boxShadow: isMe ? '0 4px 15px rgba(255, 215, 0, 0.2)' : 'var(--glass-shadow)',
-                                    border: isMe ? 'none' : '1px solid var(--glass-border)',
-                                    position: 'relative',
-                                    transition: 'all 0.2s'
-                                }}
-                                onDoubleClick={() => isMe && !msg.deleted && handleEditMessage(msg.id, msg.text)}
-                            >
-                                {msg.deleted ? (
-                                    <p style={{ fontStyle: 'italic', opacity: 0.6, fontSize: '0.9rem', margin: 0 }}>Mensaje desvanecido</p>
-                                ) : (
-                                    <>
-                                        {msg.text && <p style={{ margin: 0, lineHeight: 1.4, fontWeight: isMe ? '600' : '400' }}>{msg.text}</p>}
-                                        {msg.audio && (
-                                            <button onClick={() => playAudio(msg.audio)} style={{
-                                                display: 'flex', alignItems: 'center', gap: '10px',
-                                                background: isMe ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.08)',
-                                                border: 'none', padding: '10px 16px',
-                                                borderRadius: '100px', color: 'inherit', cursor: 'pointer',
-                                                marginTop: msg.text ? '8px' : '0'
-                                            }}>
-                                                <Play size={18} fill="currentColor" />
-                                                <span style={{ fontWeight: '800', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Soul Note</span>
-                                            </button>
-                                        )}
-                                    </>
-                                )}
-                                <div style={{
-                                    display: 'flex',
-                                    justifyContent: 'flex-end',
-                                    alignItems: 'center',
-                                    gap: '8px',
-                                    marginTop: '6px',
-                                    fontSize: '0.65rem',
-                                    opacity: 0.6
-                                }}>
-                                    {msg.edited && !msg.deleted && <span style={{ fontStyle: 'italic' }}>(editado)</span>}
-                                    <span>{formatTimestamp(msg.timestamp)}</span>
-                                    {isMe && !msg.deleted && (
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); handleDeleteMessage(msg.id); }}
-                                            style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: '0 4px', fontSize: '1rem', lineHeight: 1 }}
-                                        >
-                                            &times;
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        );
-                    })}
-                    <div ref={messagesEndRef} />
-                    {isUploading && (
-                        <div style={{ alignSelf: 'flex-end', opacity: 0.6, fontSize: '0.8rem', fontStyle: 'italic', color: 'var(--color-accent)' }} className="animate-pulse">
-                            Elevando Soul Note...
-                        </div>
-                    )}
-                </div>
-
-                {/* Input area */}
-                <div style={{
-                    padding: '0 1rem',
-                    display: 'flex',
-                    gap: '12px',
-                    alignItems: 'center',
-                    background: 'rgba(10, 25, 47, 0.95)',
-                    backdropFilter: 'blur(25px)',
-                    paddingBottom: 'calc(var(--nav-height) + var(--safe-bottom) + 15px)',
-                    paddingTop: '15px',
-                    boxShadow: '0 -10px 40px rgba(0,0,0,0.5)',
-                    position: 'relative',
-                    zIndex: 100
-                }}>
-                    <button
-                        onClick={handleRecordToggle}
-                        className="icon-btn"
-                        style={{
-                            width: '52px', height: '52px',
-                            backgroundColor: isRecording ? '#ff4444' : 'rgba(255,255,255,0.05)',
-                            color: 'white',
-                            border: 'none',
-                            boxShadow: isRecording ? '0 0 20px rgba(255, 68, 68, 0.4)' : 'none'
-                        }}
-                    >
-                        {!window.isSecureContext && window.location.hostname !== 'localhost' ?
-                            <ShieldAlert size={22} color="#ff4444" /> :
-                            <Mic size={22} className={isRecording ? 'animate-pulse' : ''} />
-                        }
-                    </button>
-                    <input
-                        type="text"
-                        value={inputText}
-                        onChange={(e) => setInputText(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                        placeholder="Escribe un mensaje..."
-                        style={{
-                            flex: 1,
-                            margin: 0,
-                            padding: '0.9rem 1.5rem',
-                            border: 'none',
-                            background: 'rgba(255,255,255,0.05)'
-                        }}
-                    />
-                    <button
-                        onClick={handleSendMessage}
-                        className="icon-btn"
-                        style={{
-                            width: '52px', height: '52px',
-                            color: 'var(--color-primary)',
-                            background: 'var(--color-secondary)',
-                            boxShadow: 'none',
-                            border: 'none'
-                        }}
-                    >
-                        <Send size={22} />
-                    </button>
-                </div>
-            </div>
-        );
     };
 
-    export default Chat;
+    const handleDeleteMatch = async () => {
+        if (!selectedMatch || !user) return;
+        if (!window.confirm(`¿Estás seguro de que quieres eliminar la conexión con ${selectedMatch.name}? Esta acción no se puede deshacer.`)) return;
+
+        try {
+            // Delete match from user's subcollection
+            await deleteDoc(doc(db, "users", user.uid, "matches", selectedMatch.id));
+
+            // Update local state
+            setMatches(prev => prev.filter(m => m.id !== selectedMatch.id));
+            setSelectedMatch(null);
+            setLiveSelectedMatch(null);
+        } catch (e) {
+            console.error("Error deleting match:", e);
+            alert("Error al eliminar la conexión.");
+        }
+    };
+
+    if (!selectedMatch) {
+        return (
+            <div className="page-container p-page">
+                <h2 style={{ color: 'var(--color-secondary)', marginBottom: '1.5rem', fontSize: '1.8rem', fontWeight: '800' }}>Matches</h2>
+                {isLoadingMatches ? (
+                    <div style={{ textAlign: 'center', marginTop: '3rem' }}>
+                        <div className="animate-pulse" style={{ color: 'var(--color-secondary)' }}>Gathering souls...</div>
+                    </div>
+                ) : matches.length === 0 ? (
+                    <p style={{ color: 'var(--color-text-muted)', textAlign: 'center', marginTop: '3rem' }}>No matches yet. Go swipe!</p>
+                ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        {matches.map(match => (
+                            <MatchItem key={match.id} match={match} onClick={setSelectedMatch} />
+                        ))}
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+            {/* Header */}
+            <div style={{
+                padding: '1rem', borderBottom: '1px solid var(--glass-border)',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                background: 'rgba(10, 25, 47, 0.8)',
+                backdropFilter: 'blur(20px)',
+                zIndex: 10
+            }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <button onClick={() => setSelectedMatch(null)} className="icon-btn" style={{ borderRadius: '12px' }}><ChevronLeft color="white" /></button>
+                    <img
+                        src={getHighResPhoto(liveSelectedMatch?.avatar || liveSelectedMatch?.photoURL) || `https://ui-avatars.com/api/?background=0a192f&color=ffd700&name=${encodeURIComponent(liveSelectedMatch?.name || 'Soul')}`}
+                        alt={liveSelectedMatch?.name || 'Soul'}
+                        style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--color-secondary)' }}
+                    />
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ fontWeight: '800', fontSize: '1.1rem', letterSpacing: '-0.02em' }}>{liveSelectedMatch?.name || 'Conectando...'}</span>
+                        <div
+                            onClick={() => setShowDiagnostics(!showDiagnostics)}
+                            style={{ fontSize: '0.65rem', opacity: 0.6, cursor: 'pointer', color: 'var(--color-accent)' }}
+                        >
+                            {showDiagnostics ? 'Ocultar Estado' : 'Verificar Frecuencia'}
+                        </div>
+                    </div>
+                </div>
+
+                {showDiagnostics && (
+                    <div className="card" style={{
+                        position: 'absolute', top: '75px', left: '1rem', right: '1rem',
+                        fontSize: '0.75rem', zIndex: 100, background: 'rgba(0,0,0,0.95)'
+                    }}>
+                        <div style={{ color: 'var(--color-secondary)', fontWeight: 'bold', marginBottom: '8px', fontSize: '0.8rem' }}>Audio Diagnostics:</div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                            <div>Secure Context: {window.isSecureContext ? '✅' : '❌'}</div>
+                            <div>Media Support: {navigator.mediaDevices ? '✅' : '❌'}</div>
+                            <div>MediaRecorder: {window.MediaRecorder ? '✅' : '❌'}</div>
+                            <div>WebM: {MediaRecorder?.isTypeSupported('audio/webm') ? '✅' : '❌'}</div>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Messages */}
+            <div style={{
+                flex: 1,
+                overflowY: 'auto',
+                padding: '1.5rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1.2rem',
+                WebkitOverflowScrolling: 'touch',
+                background: 'transparent'
+            }}>
+                {messages.map((msg, idx) => {
+                    const isMe = msg.senderId === user.uid;
+                    return (
+                        <div key={msg.id || idx}
+                            style={{
+                                alignSelf: isMe ? 'flex-end' : 'flex-start',
+                                background: isMe ? 'linear-gradient(135deg, var(--color-secondary) 0%, #e6c200 100%)' : 'var(--glass-bg)',
+                                color: isMe ? 'var(--color-primary)' : 'white',
+                                padding: '12px 18px',
+                                borderRadius: '20px',
+                                maxWidth: '85%',
+                                borderBottomRightRadius: isMe ? '4px' : '20px',
+                                borderBottomLeftRadius: isMe ? '20px' : '4px',
+                                boxShadow: isMe ? '0 4px 15px rgba(255, 215, 0, 0.2)' : 'var(--glass-shadow)',
+                                border: isMe ? 'none' : '1px solid var(--glass-border)',
+                                position: 'relative',
+                                transition: 'all 0.2s'
+                            }}
+                            onDoubleClick={() => isMe && !msg.deleted && handleEditMessage(msg.id, msg.text)}
+                        >
+                            {msg.deleted ? (
+                                <p style={{ fontStyle: 'italic', opacity: 0.6, fontSize: '0.9rem', margin: 0 }}>Mensaje desvanecido</p>
+                            ) : (
+                                <>
+                                    {msg.text && <p style={{ margin: 0, lineHeight: 1.4, fontWeight: isMe ? '600' : '400' }}>{msg.text}</p>}
+                                    {msg.audio && (
+                                        <button onClick={() => playAudio(msg.audio)} style={{
+                                            display: 'flex', alignItems: 'center', gap: '10px',
+                                            background: isMe ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.08)',
+                                            border: 'none', padding: '10px 16px',
+                                            borderRadius: '100px', color: 'inherit', cursor: 'pointer',
+                                            marginTop: msg.text ? '8px' : '0'
+                                        }}>
+                                            <Play size={18} fill="currentColor" />
+                                            <span style={{ fontWeight: '800', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Soul Note</span>
+                                        </button>
+                                    )}
+                                </>
+                            )}
+                            <div style={{
+                                display: 'flex',
+                                justifyContent: 'flex-end',
+                                alignItems: 'center',
+                                gap: '8px',
+                                marginTop: '6px',
+                                fontSize: '0.65rem',
+                                opacity: 0.6
+                            }}>
+                                {msg.edited && !msg.deleted && <span style={{ fontStyle: 'italic' }}>(editado)</span>}
+                                <span>{formatTimestamp(msg.timestamp)}</span>
+                                {isMe && !msg.deleted && (
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); handleDeleteMessage(msg.id); }}
+                                        style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: '0 4px', fontSize: '1rem', lineHeight: 1 }}
+                                    >
+                                        &times;
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    );
+                })}
+                <div ref={messagesEndRef} />
+                {isUploading && (
+                    <div style={{ alignSelf: 'flex-end', opacity: 0.6, fontSize: '0.8rem', fontStyle: 'italic', color: 'var(--color-accent)' }} className="animate-pulse">
+                        Elevando Soul Note...
+                    </div>
+                )}
+            </div>
+
+            {/* Input area */}
+            <div style={{
+                padding: '0 1rem',
+                display: 'flex',
+                gap: '12px',
+                alignItems: 'center',
+                background: 'rgba(10, 25, 47, 0.95)',
+                backdropFilter: 'blur(25px)',
+                paddingBottom: 'calc(var(--nav-height) + var(--safe-bottom) + 15px)',
+                paddingTop: '15px',
+                boxShadow: '0 -10px 40px rgba(0,0,0,0.5)',
+                position: 'relative',
+                zIndex: 100
+            }}>
+                <button
+                    onClick={handleRecordToggle}
+                    className="icon-btn"
+                    style={{
+                        width: '52px', height: '52px',
+                        backgroundColor: isRecording ? '#ff4444' : 'rgba(255,255,255,0.05)',
+                        color: 'white',
+                        border: 'none',
+                        boxShadow: isRecording ? '0 0 20px rgba(255, 68, 68, 0.4)' : 'none'
+                    }}
+                >
+                    {!window.isSecureContext && window.location.hostname !== 'localhost' ?
+                        <ShieldAlert size={22} color="#ff4444" /> :
+                        <Mic size={22} className={isRecording ? 'animate-pulse' : ''} />
+                    }
+                </button>
+                <input
+                    type="text"
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                    placeholder="Escribe un mensaje..."
+                    style={{
+                        flex: 1,
+                        margin: 0,
+                        padding: '0.9rem 1.5rem',
+                        border: 'none',
+                        background: 'rgba(255,255,255,0.05)'
+                    }}
+                />
+                <button
+                    onClick={handleSendMessage}
+                    className="icon-btn"
+                    style={{
+                        width: '52px', height: '52px',
+                        color: 'var(--color-primary)',
+                        background: 'var(--color-secondary)',
+                        boxShadow: 'none',
+                        border: 'none'
+                    }}
+                >
+                    <Send size={22} />
+                </button>
+            </div>
+        </div>
+    );
+};
+
+export default Chat;
