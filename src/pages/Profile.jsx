@@ -190,7 +190,7 @@ const Profile = () => {
             </div>
             {/* Arquetipo e Identidad */}
             <div className="card animate-fade-in" style={{ textAlign: 'center' }}>
-                <label style={{ display: 'block', marginBottom: '0.8rem', color: 'var(--color-text-muted)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 'bold' }}>Identidad del Alma</label>
+                <label style={{ display: 'block', marginBottom: '0.8rem', color: 'var(--color-text-muted)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 'bold' }}>Personalidad</label>
                 <div style={{
                     fontSize: '1.8rem',
                     fontWeight: '800',

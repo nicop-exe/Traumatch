@@ -212,7 +212,7 @@ const Chat = () => {
                 />
                 <div>
                     <div style={{ fontWeight: '800', fontSize: '1.2rem', letterSpacing: '-0.02em' }}>{liveMatch.name}</div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--color-accent)', opacity: 0.8 }}>Sintonizar con esta alma →</div>
+
                 </div>
             </div>
         );
@@ -468,7 +468,7 @@ const Chat = () => {
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                    placeholder="Escribe una resonancia..."
+                    placeholder="Escribe un mensaje..."
                     style={{
                         flex: 1,
                         margin: 0,
