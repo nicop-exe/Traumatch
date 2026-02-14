@@ -5,128 +5,139 @@ import { Music, TrendingUp, Radio } from 'lucide-react';
 const Home = () => {
     const { user } = useContext(AppContext);
 
-    const getPersonalizedRecs = () => {
-        const hasTrauma = user?.traumas?.length > 0;
-        const traits = [...(user?.positive || []), ...(user?.traumas || [])];
-
-        const baseRecs = [
-            {
-                type: 'music',
-                title: 'Melancholy Lo-Fi',
-                subtitle: 'To soothe your anxiety',
-                icon: <Music />,
-                url: 'https://open.spotify.com/playlist/37i9dQZF1DX8Ueb9CidzhR'
-            },
-            {
-                type: 'news',
-                title: 'Understanding Attachment',
-                subtitle: 'Psychology Today',
-                icon: <TrendingUp />,
-                url: 'https://www.psychologytoday.com'
-            },
-            {
-                type: 'podcast',
-                title: 'The Trauma Cleanup',
-                subtitle: 'Episode 4: Healing',
-                icon: <Radio />,
-                url: 'https://open.spotify.com/show/2v8IqRTMhM5vL6z8v6m5kO'
-            },
-        ];
-
-        if (traits.includes('Anxiety') || traits.includes('Melancholic')) {
-            baseRecs.unshift({
-                type: 'music',
-                title: 'Deep Focus Ambient',
-                subtitle: 'Calm for the mind',
-                icon: <Music />,
-                url: 'https://open.spotify.com/playlist/37i9dQZF1DX4sWspn04Zq1'
-            });
-        }
-
-        if (traits.includes('Creative Soul') || traits.includes('Passionate')) {
-            baseRecs.unshift({
-                type: 'podcast',
-                title: 'Creative Pep Talk',
-                subtitle: 'Fuel your fire',
-                icon: <Radio />,
-                url: 'https://open.spotify.com/show/6pC9C7vN7Y5XqYpY9n5J2Y'
-            });
-        }
-
-        return baseRecs;
+    // Curated Database of Real YouTube Content
+    const VIDEO_DATABASE = {
+        'Anxiety': [
+            { title: "Heal Anxiety & Overthinking", channel: "The School of Life", id: "5zfnl2dJ1yI", type: "video" },
+            { title: "10 Minute Mindfulness", channel: "Calm", id: "ZToicYcHIOU", type: "meditation" }
+        ],
+        'Depression': [
+            { title: "The opposite of depression is connection", channel: "Johann Hari", id: "MB5IX-np5fE", type: "ted" },
+            { title: "Kindness towards yourself", channel: "HealthyGamerGG", id: "L4N1q4EBfms", type: "video" }
+        ],
+        'Creative': [
+            { title: "Your elusive creative genius", channel: "Elizabeth Gilbert", id: "86x-u-tz0MA", type: "ted" },
+            { title: "Flow State Music", channel: "Lofi Girl", id: "jfKfPfyJRdk", type: "music" }
+        ],
+        'Spiritual': [
+            { title: "The Power of Now", channel: "Eckhart Tolle", id: "T4M4uJ8n8e4", type: "video" },
+            { title: "Awakening the Mind", channel: "Alan Watts", id: "7YgFl5rT5yw", type: "video" }
+        ],
+        'General': [
+            { title: "Why We Are Lonely", channel: "Kurzgesagt", id: "n3Xv_g3g-mA", type: "video" },
+            { title: "The Art of Letting Go", channel: "The Tao of Pooh", id: "5s2j9h9E0Kk", type: "video" },
+            { title: "Emotional Intelligence", channel: "Daniel Goleman", id: "Y7m9eNoB3NU", type: "ted" }
+        ]
     };
 
-    const recommendations = getPersonalizedRecs();
+    const getPersonalizedRecs = () => {
+        let recommendations = [...VIDEO_DATABASE['General']];
+        const traits = [...(user?.positive || []), ...(user?.traumas || []), ...(user?.interests || [])];
+
+        // Map traits to categories
+        if (traits.some(t => ['Ansiedad', 'Anxiety', 'Inseguridad', 'Meditation'].includes(t))) {
+            recommendations = [...VIDEO_DATABASE['Anxiety'], ...recommendations];
+        }
+        if (traits.some(t => ['Melancolía', 'Depression', 'Soledad', 'Loneliness'].includes(t))) {
+            recommendations = [...VIDEO_DATABASE['Depression'], ...recommendations];
+        }
+        if (traits.some(t => ['Creativo', 'Creative', 'Art', 'Music'].includes(t))) {
+            recommendations = [...VIDEO_DATABASE['Creative'], ...recommendations];
+        }
+        if (traits.some(t => ['Philosophy', 'Astrology', 'Nature', 'Místico'].includes(t))) {
+            recommendations = [...VIDEO_DATABASE['Spiritual'], ...recommendations];
+        }
+
+        // Deduplicate by ID
+        return Array.from(new Set(recommendations.map(a => a.id)))
+            .map(id => recommendations.find(a => a.id === id))
+            .slice(0, 6); // Top 6 results
+    };
+
+    const recs = getPersonalizedRecs();
 
     return (
         <div className="page-container p-page animate-fade-in">
-            <h1 className="text-gradient" style={{ fontSize: '2.5rem', marginBottom: '2rem', textAlign: 'center', fontWeight: '800' }}>Welcome Home</h1>
-
-            <section style={{ marginBottom: '3rem' }}>
-                <h3 style={{ marginBottom: '1.2rem', color: 'var(--color-accent)', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '2px', fontWeight: 'bold' }}>Daily Mood Mix</h3>
-                <div style={{
-                    display: 'flex',
-                    overflowX: 'auto',
-                    gap: '1.2rem',
-                    paddingBottom: '1rem',
-                    scrollSnapType: 'x mandatory'
-                }}>
-                    {[1, 2, 3].map((i) => (
-                        <div key={i} className="card" style={{
-                            minWidth: '160px',
-                            height: '160px',
-                            flex: '0 0 auto',
-                            scrollSnapAlign: 'start',
-                            display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
-                            padding: '1.5rem',
-                            margin: 0,
-                            position: 'relative',
-                            overflow: 'hidden'
-                        }}>
-                            <div style={{ position: 'absolute', top: '15px', left: '15px', color: 'var(--color-accent)' }}><Music size={20} /></div>
-                            <span style={{ fontWeight: 'bold', fontSize: '1rem' }}>Vibe {i}</span>
-                        </div>
-                    ))}
-                </div>
-            </section>
+            <h1 className="text-gradient" style={{ fontSize: '2.5rem', marginBottom: '0.5rem', textAlign: 'center', fontWeight: '800' }}>
+                Welcome Home, {user?.name?.split(' ')[0] || 'Soul'}
+            </h1>
+            <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', marginBottom: '2.5rem' }}>
+                Tu refugio digital adaptado a tu frecuencia.
+            </p>
 
             <section>
-                <h3 style={{ marginBottom: '1.2rem', color: 'var(--color-accent)', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '2px', fontWeight: 'bold' }}>Curated For Your Journey</h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem' }}>
+                    <TrendingUp size={20} color="var(--color-accent)" />
+                    <h3 style={{ margin: 0, color: 'white', textTransform: 'uppercase', fontSize: '0.9rem', letterSpacing: '2px', fontWeight: '800' }}>Para tu camino</h3>
+                </div>
+
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                    gap: '1.2rem'
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                    gap: '1.5rem'
                 }}>
-                    {recommendations.map((item, idx) => (
+                    {recs.map((video, idx) => (
                         <a
                             key={idx}
-                            href={item.url}
+                            href={`https://www.youtube.com/watch?v=${video.id}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="card"
+                            className="card animate-fade-in"
                             style={{
-                                padding: '1.2rem',
-                                display: 'flex', alignItems: 'center', gap: '15px',
-                                transition: 'transform 0.2s, background 0.2s',
-                                cursor: 'pointer',
+                                padding: 0,
+                                overflow: 'hidden',
+                                display: 'flex',
+                                flexDirection: 'column',
                                 textDecoration: 'none',
                                 color: 'inherit',
-                                margin: 0
+                                margin: 0,
+                                border: '1px solid var(--glass-border)',
+                                transition: 'transform 0.2s, box-shadow 0.2s',
+                                cursor: 'pointer'
                             }}
-                            onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.06)'}
-                            onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.03)'}
+                            onMouseOver={(e) => {
+                                e.currentTarget.style.transform = 'translateY(-5px)';
+                                e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
+                            }}
+                            onMouseOut={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = 'var(--glass-shadow)';
+                            }}
                         >
-                            <div style={{
-                                width: '48px', height: '48px', minWidth: '48px',
-                                borderRadius: '12px', backgroundColor: 'rgba(100,255,218,0.1)',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                color: 'var(--color-accent)'
-                            }}>
-                                {item.icon}
+                            {/* Thumbnail */}
+                            <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%' }}>
+                                <img
+                                    src={`https://img.youtube.com/vi/${video.id}/hqdefault.jpg`}
+                                    alt={video.title}
+                                    style={{
+                                        position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+                                        objectFit: 'cover'
+                                    }}
+                                />
+                                <div style={{
+                                    position: 'absolute', inset: 0,
+                                    background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
+                                    display: 'flex', alignItems: 'flex-end', padding: '1rem'
+                                }}>
+                                    <div style={{
+                                        background: 'rgba(255,0,0,0.85)', color: 'white',
+                                        padding: '4px 8px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 'bold',
+                                        display: 'flex', alignItems: 'center', gap: '5px'
+                                    }}>
+                                        <Music size={12} /> Play
+                                    </div>
+                                </div>
                             </div>
-                            <div style={{ overflow: 'hidden' }}>
-                                <div style={{ fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'white' }}>{item.title}</div>
-                                <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.subtitle}</div>
+
+                            {/* Content */}
+                            <div style={{ padding: '1.2rem' }}>
+                                <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '1rem', lineHeight: 1.4, fontWeight: '700' }}>{video.title}</h4>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <span style={{ fontSize: '0.8rem', color: 'var(--color-accent)', opacity: 0.9 }}>{video.channel}</span>
+                                    <span style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', border: '1px solid var(--glass-border)', padding: '2px 6px', borderRadius: '4px' }}>
+                                        {video.type}
+                                    </span>
+                                </div>
                             </div>
                         </a>
                     ))}
