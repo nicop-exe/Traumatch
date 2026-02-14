@@ -351,11 +351,23 @@ const Profile = () => {
                     </div>
                     <button
                         onClick={() => setIsLocationPrivate(!isLocationPrivate)}
-                        className="icon-btn"
-                        style={{ color: isLocationPrivate ? 'var(--color-accent)' : 'var(--color-text-muted)', gap: '5px', borderRadius: '8px' }}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '8px 14px',
+                            borderRadius: '100px',
+                            border: `1px solid ${isLocationPrivate ? 'var(--color-accent)' : 'rgba(255,255,255,0.15)'}`,
+                            background: isLocationPrivate ? 'rgba(100, 255, 218, 0.1)' : 'rgba(255,255,255,0.05)',
+                            color: isLocationPrivate ? 'var(--color-accent)' : 'var(--color-text-muted)',
+                            fontSize: '0.8rem',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            transition: 'var(--transition-smooth)'
+                        }}
                     >
-                        {isLocationPrivate ? <Lock size={16} /> : <Globe size={16} />}
-                        <span style={{ fontSize: '0.8rem' }}>{isLocationPrivate ? 'Private' : 'Public'}</span>
+                        {isLocationPrivate ? <Lock size={14} /> : <Globe size={14} />}
+                        {isLocationPrivate ? 'Private' : 'Public'}
                     </button>
                 </div>
                 <div style={{ position: 'relative' }}>
