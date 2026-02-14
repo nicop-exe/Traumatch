@@ -64,53 +64,86 @@ const Home = () => {
             <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', marginBottom: '2.5rem' }}>
                 Tu refugio digital adaptado a tu frecuencia.
             </p>
-                            }}
-            onMouseOut={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'var(--glass-shadow)';
-            }}
-                        >
-            {/* Thumbnail */}
-            <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%' }}>
-                <img
-                    src={`https://img.youtube.com/vi/${video.id}/hqdefault.jpg`}
-                    alt={video.title}
-                    style={{
-                        position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-                        objectFit: 'cover'
-                    }}
-                />
-                <div style={{
-                    position: 'absolute', inset: 0,
-                    background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
-                    display: 'flex', alignItems: 'flex-end', padding: '1rem'
-                }}>
-                    <div style={{
-                        background: 'rgba(255,0,0,0.85)', color: 'white',
-                        padding: '4px 8px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 'bold',
-                        display: 'flex', alignItems: 'center', gap: '5px'
-                    }}>
-                        <Music size={12} /> Play
-                    </div>
-                </div>
-            </div>
 
-            {/* Content */}
-            <div style={{ padding: '1.2rem' }}>
-                <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '1rem', lineHeight: 1.4, fontWeight: '700' }}>{video.title}</h4>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.8rem', color: 'var(--color-accent)', opacity: 0.9 }}>{video.channel}</span>
-                    <span style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', border: '1px solid var(--glass-border)', padding: '2px 6px', borderRadius: '4px' }}>
-                        {video.type}
-                    </span>
+            <section>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem' }}>
+                    <TrendingUp size={20} color="var(--color-accent)" />
+                    <h3 style={{ margin: 0, color: 'white', textTransform: 'uppercase', fontSize: '0.9rem', letterSpacing: '2px', fontWeight: '800' }}>Para tu camino</h3>
                 </div>
-            </div>
-        </a>
-    ))
-}
-                </div >
-            </section >
-        </div >
+
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                    gap: '1.5rem'
+                }}>
+                    {recs.map((video, idx) => (
+                        <a
+                            key={idx}
+                            href={`https://www.youtube.com/watch?v=${video.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="card animate-fade-in"
+                            style={{
+                                padding: 0,
+                                overflow: 'hidden',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                textDecoration: 'none',
+                                color: 'inherit',
+                                margin: 0,
+                                border: '1px solid var(--glass-border)',
+                                transition: 'transform 0.2s, box-shadow 0.2s',
+                                cursor: 'pointer'
+                            }}
+                            onMouseOver={(e) => {
+                                e.currentTarget.style.transform = 'translateY(-5px)';
+                                e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
+                            }}
+                            onMouseOut={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = 'var(--glass-shadow)';
+                            }}
+                        >
+                            {/* Thumbnail */}
+                            <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%' }}>
+                                <img
+                                    src={`https://img.youtube.com/vi/${video.id}/hqdefault.jpg`}
+                                    alt={video.title}
+                                    style={{
+                                        position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+                                        objectFit: 'cover'
+                                    }}
+                                />
+                                <div style={{
+                                    position: 'absolute', inset: 0,
+                                    background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
+                                    display: 'flex', alignItems: 'flex-end', padding: '1rem'
+                                }}>
+                                    <div style={{
+                                        background: 'rgba(255,0,0,0.85)', color: 'white',
+                                        padding: '4px 8px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 'bold',
+                                        display: 'flex', alignItems: 'center', gap: '5px'
+                                    }}>
+                                        <Music size={12} /> Play
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Content */}
+                            <div style={{ padding: '1.2rem' }}>
+                                <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '1rem', lineHeight: 1.4, fontWeight: '700' }}>{video.title}</h4>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <span style={{ fontSize: '0.8rem', color: 'var(--color-accent)', opacity: 0.9 }}>{video.channel}</span>
+                                    <span style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', border: '1px solid var(--glass-border)', padding: '2px 6px', borderRadius: '4px' }}>
+                                        {video.type}
+                                    </span>
+                                </div>
+                            </div>
+                        </a>
+                    ))}
+                </div>
+            </section>
+        </div>
     );
 };
 
